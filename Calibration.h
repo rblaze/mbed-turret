@@ -1,10 +1,13 @@
 #pragma once
 
+#include <cmath>
+#include <cstdint>
 #include <limits>
+#include <mbed_assert.h>
 
-struct Sample {
-  uint16_t mean{0};
-  uint16_t stddev{0};
+struct Point {
+  float mean{0};
+  float stddev{0};
 };
 
 class CalibrationData {
@@ -18,15 +21,14 @@ public:
     m2_ += delta * delta2;
   }
 
-  Sample finalize() {
+  Point finalize() {
     MBED_ASSERT(count_ > 1);
     auto stddev = std::sqrt(m2_ / (count_ - 1));
 
     MBED_ASSERT(mean_ >= 0);
     MBED_ASSERT(mean_ <= std::numeric_limits<uint16_t>::max());
-    MBED_ASSERT(stddev <= mean_);
 
-    return Sample{(uint16_t)std::lround(mean_), (uint16_t)std::lround(stddev)};
+    return Point{mean_, stddev};
   }
 
 private:

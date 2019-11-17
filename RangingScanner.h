@@ -2,24 +2,21 @@
 
 #include "LaserSensor.h"
 #include "Servo.h"
-#include "ranging.h"
+#include <vector>
 
 class RangingScanner {
 public:
-  RangingScanner(Servo &servo, LaserSensor &sensor)
-      : servo_{servo}, sensor_{sensor} {
-    baseline_scan();
-  }
+  RangingScanner(Servo &servo, LaserSensor &sensor, size_t numSteps,
+                 float nSigma, uint16_t minDiff);
+
+  void search(size_t minLockPoints, size_t maxBreakPoints,
+              mbed::Callback<void(float)> cb);
 
 private:
-  void baseline_scan();
-
-  static constexpr size_t kNumSteps = 180;
-  static constexpr float kRotationStep = 1.0 / (float)(kNumSteps - 1);
-  static constexpr int kStepDelay = 100;    // 0.1s
+  static constexpr int kStepDelay = 100; // 0.1s
   static constexpr int kNumCalibrations = 5;
 
   Servo &servo_;
   LaserSensor &sensor_;
-  // std::array<Sample, kNumSteps> baseline_;
+  std::vector<uint16_t> baseline_;
 };
