@@ -57,26 +57,18 @@ private:
 
 } // namespace
 
-RangingScanner::RangingScanner(Servo &servo, LaserSensor &sensor,
+RangingScanner::RangingScanner(FastServo &servo, LaserSensor &sensor,
                                size_t numSteps, float nSigma, uint16_t minDiff)
     : servo_{servo}, sensor_{sensor}, baseline_(numSteps) {
   MBED_ASSERT(numSteps > 1);
   const float rotationStep = 1.0 / (float)(numSteps - 1);
 
   if (!sensor_.setLongDistanceMode()) {
-    printf("set mode failed\n");
+    // printf("set mode failed\n");
   }
 
   if (!sensor_.setTimings(100, 200)) {
-    printf("set timing failed\n");
-  }
-
-  if (auto b = sensor_.getBudget()) {
-    printf("budget %hd\n", *b);
-  }
-
-  if (auto p = sensor_.getPeriod()) {
-    printf("period %hd\n", *p);
+    // printf("set timing failed\n");
   }
 
   servo_.write(0);
@@ -133,8 +125,8 @@ void RangingScanner::scan(bool scanForward, size_t minLockPoints,
     ThisThread::sleep_for(kStepDelay);
 
     if (sensor_.measureOnce()) {
-      auto status = sensor_.getStatus();
       auto distance = sensor_.getDistance();
+      auto status = sensor_.getStatus();
 
       printf("%d: %d %hd\n", i, (int)status, distance);
 
