@@ -24,44 +24,37 @@ const std::unordered_map<AudioPlayer::Clip, AudioPlayer::Data>
     };
 
 AudioPlayer::AudioPlayer(PinName pin)
-    : sharedQueue_{mbed_event_queue()}, pwm_{pin} {
+    : sharedQueue_{mbed_event_queue()},
+      playEvent_{sharedQueue_->event(this, &AudioPlayer::playClip)}, pwm_{pin} {
   // Audio samples are at 16KHz.
   // Set PWM to 4x this frequency.
   pwm_.period(1.0 / (kFreq * 4.0));
 }
 
-void AudioPlayer::play(Clip clip) {
-  auto p = clips_.find(clip);
+// clip_ only changed from event queue, no synchronization necessary.
+// Until it is single-threaded, that is.
 
-  if (p != clips_.end()) {
-    sharedQueue_->call(callback(this, &AudioPlayer::setClip), p->second);
+void AudioPlayer::playClip(Clip clip) {
+  if (!clip_) {
+    auto p = clips_.find(clip);
+
+    if (p != clips_.end()) {
+      clip_ = p->second;
+      position_ = 0;
+      ticker_.attach_us(callback(this, &AudioPlayer::nextSample),
+                        1000000 / kFreq);
+    }
   }
 }
 
-void AudioPlayer::setClip(std::experimental::optional<Data> nextClip) {
-  mtx_.lock();
-
-  if (nextClip && !clip_) {
-    // Start next clip.
-    clip_ = nextClip;
-    position_ = 0;
-    ticker_.attach_us(callback(this, &AudioPlayer::nextSample),
-                      1000000 / kFreq);
-  } else if (!nextClip) {
-    // Mark player free.
-    clip_ = nextClip;
-  }
-
-  mtx_.unlock();
-}
+void AudioPlayer::clipFinished() { clip_ = std::experimental::nullopt; }
 
 void AudioPlayer::nextSample() {
   MBED_ASSERT(clip_);
 
   if (position_ >= clip_->size()) {
     ticker_.detach();
-    sharedQueue_->call(callback(this, &AudioPlayer::setClip),
-                       std::experimental::nullopt);
+    sharedQueue_->call(this, &AudioPlayer::clipFinished);
   } else {
     pwm_.write((double)(*clip_)[position_] / 255.0);
     position_ += 1;

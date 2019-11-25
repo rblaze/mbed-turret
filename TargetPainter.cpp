@@ -1,26 +1,26 @@
 #include "TargetPainter.h"
 
 TargetPainter::TargetPainter(FastServo &servo, DigitalOut &laser,
-                             AudioPlayer &audio)
+                             Event<void(AudioPlayer::Clip)> &player)
     : sharedQueue_{mbed_event_queue()}, targetEvent_{sharedQueue_->event(
                                             this, &TargetPainter::turnOnLaser)},
-      servo_{servo}, laser_{laser}, audio_{audio} {}
+      servo_{servo}, laser_{laser}, player_{player} {}
 
 // All methods are called from shared event queue.
 // This removes the need for synchronization.
 
 void TargetPainter::targetLost() {
-  if ((random() % 2) == 0) {
-    audio_.play(AudioPlayer::Clip::TARGET_LOST);
+  if ((time(nullptr) % 2) == 0) {
+    player_.post(AudioPlayer::Clip::TARGET_LOST);
   } else {
-    audio_.play(AudioPlayer::Clip::ARE_YOU_STILL_THERE);
+    player_.post(AudioPlayer::Clip::ARE_YOU_STILL_THERE);
   }
   timeoutEventId_ = 0;
 }
 
 void TargetPainter::turnOffLaser() {
   laser_.write(0);
-  audio_.play(AudioPlayer::Clip::SFX_RETRACT);
+  player_.post(AudioPlayer::Clip::SFX_RETRACT);
   timeoutEventId_ =
       sharedQueue_->call_in(targetLostDelay, this, &TargetPainter::targetLost);
 }
@@ -30,13 +30,13 @@ void TargetPainter::turnOnLaser(float pos) {
 
   if (laser_.read() == 0) {
     if (now - lastContact_ > recentContactThreshold || lastContact_ == 0) {
-      if ((random() % 2) == 0) {
-        audio_.play(AudioPlayer::Clip::HELLO_FRIEND);
+      if ((time(nullptr) % 2) == 0) {
+        player_.post(AudioPlayer::Clip::HELLO_FRIEND);
       } else {
-        audio_.play(AudioPlayer::Clip::I_SEE_YOU);
+        player_.post(AudioPlayer::Clip::I_SEE_YOU);
       }
     } else {
-      audio_.play(AudioPlayer::Clip::SFX_ACTIVE);
+      player_.post(AudioPlayer::Clip::SFX_ACTIVE);
     }
   }
 

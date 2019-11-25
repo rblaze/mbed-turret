@@ -4,7 +4,8 @@
 
 class TargetPainter {
 public:
-  TargetPainter(FastServo &servo, DigitalOut &laser, AudioPlayer &audio);
+  TargetPainter(FastServo &servo, DigitalOut &laser,
+                Event<void(AudioPlayer::Clip)> &player);
 
   Event<void(float)> &targetEvent() { return targetEvent_; }
 
@@ -19,9 +20,9 @@ private:
 
   EventQueue *sharedQueue_;
   Event<void(float)> targetEvent_;
-  FastServo &servo_;
-  DigitalOut &laser_;
-  AudioPlayer &audio_;
   time_t lastContact_{0};
   int timeoutEventId_{0};
+  FastServo &servo_;
+  DigitalOut &laser_;
+  Event<void(AudioPlayer::Clip)> &player_;
 };

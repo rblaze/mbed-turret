@@ -19,7 +19,7 @@ public:
     TARGET_LOST,
   };
 
-  void play(Clip);
+  Event<void(Clip)> &playEvent() { return playEvent_; }
 
 private:
   // Clips are 8 bit, 16 KHz.
@@ -27,14 +27,14 @@ private:
   static constexpr uint32_t kFreq = 16000;
   static const std::unordered_map<Clip, Data> clips_;
 
-  void setClip(std::experimental::optional<Data>);
+  void playClip(Clip);
+  void clipFinished();
   void nextSample();
 
   EventQueue *sharedQueue_;
+  Event<void(Clip)> playEvent_;
   FastPWM pwm_;
   Ticker ticker_;
-  int position_{0};
-
-  Mutex mtx_;
   std::experimental::optional<Data> clip_;
+  int position_{0};
 };

@@ -49,13 +49,13 @@ int main() {
   DigitalOut laser{LASER_POWER, 0};
   AudioPlayer audio{AUDIO_OUT};
 
-  TargetPainter painter{laserServo, laser, audio};
+  TargetPainter painter{laserServo, laser, audio.playEvent()};
   auto numSteps{calibrateServos(sensorServo, laserServo) * 2};
 
-  audio.play(AudioPlayer::Clip::DEPLOYING);
+  audio.playEvent().post(AudioPlayer::Clip::DEPLOYING);
   RangingScanner scanner(sensorServo, sensor, numSteps, 2, 100);
 
-  audio.play(AudioPlayer::Clip::SFX_DEPLOY);
+  audio.playEvent().post(AudioPlayer::Clip::SFX_DEPLOY);
   for (;;) {
     scanner.search(8, 4, painter.targetEvent());
   }
