@@ -1,5 +1,6 @@
 #include "RangingScanner.h"
 #include "Calibration.h"
+#include <experimental/optional>
 
 namespace {
 
