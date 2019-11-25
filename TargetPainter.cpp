@@ -1,22 +1,31 @@
 #include "TargetPainter.h"
 
+TargetPainter::TargetPainter(FastServo &servo, DigitalOut &laser,
+                             AudioPlayer &audio)
+    : sharedQueue_{mbed_event_queue()}, targetEvent_{sharedQueue_->event(
+                                            this, &TargetPainter::turnOnLaser)},
+      servo_{servo}, laser_{laser}, audio_{audio} {}
+
+// All methods are called from shared event queue.
+// This removes the need for synchronization.
+
 void TargetPainter::targetLost() {
   if ((random() % 2) == 0) {
     audio_.play(AudioPlayer::Clip::TARGET_LOST);
   } else {
     audio_.play(AudioPlayer::Clip::ARE_YOU_STILL_THERE);
   }
+  timeoutEventId_ = 0;
 }
 
 void TargetPainter::turnOffLaser() {
   laser_.write(0);
   audio_.play(AudioPlayer::Clip::SFX_RETRACT);
-  // schedule audio effect in 30 seconds.
-  timeout_.attach_us(callback(this, &TargetPainter::targetLost),
-                     targetLostAudioDelay);
+  timeoutEventId_ =
+      sharedQueue_->call_in(targetLostDelay, this, &TargetPainter::targetLost);
 }
 
-void TargetPainter::targetAt(float pos) {
+void TargetPainter::turnOnLaser(float pos) {
   time_t now = time(nullptr);
 
   if (laser_.read() == 0) {
@@ -37,7 +46,10 @@ void TargetPainter::targetAt(float pos) {
   laser_.write(1);
 
   // Forget old timeout, set a new one in 5 seconds.
-  timeout_.detach();
-  timeout_.attach_us(callback(this, &TargetPainter::turnOffLaser),
-                     laserOffDelay);
+  if (timeoutEventId_ != 0) {
+    sharedQueue_->cancel(timeoutEventId_);
+  }
+
+  timeoutEventId_ =
+      sharedQueue_->call_in(laserOffDelay, this, &TargetPainter::turnOffLaser);
 }

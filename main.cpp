@@ -48,6 +48,7 @@ int main() {
   FastServo laserServo{LASER_SERVO};
   DigitalOut laser{LASER_POWER, 0};
   AudioPlayer audio{AUDIO_OUT};
+
   TargetPainter painter{laserServo, laser, audio};
   auto numSteps{calibrateServos(sensorServo, laserServo) * 2};
 
@@ -56,8 +57,6 @@ int main() {
 
   audio.play(AudioPlayer::Clip::SFX_DEPLOY);
   for (;;) {
-    scanner.search(
-        8, 4,
-        RangingScanner::TargetCallback(&painter, &TargetPainter::targetAt));
+    scanner.search(8, 4, painter.targetEvent());
   }
 }

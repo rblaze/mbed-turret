@@ -104,8 +104,7 @@ RangingScanner::RangingScanner(FastServo &servo, LaserSensor &sensor,
 }
 
 void RangingScanner::scan(bool scanForward, size_t minLockPoints,
-                          size_t maxBreakPoints,
-                          mbed::Callback<void(float)> cb) {
+                          size_t maxBreakPoints, TargetEvent &ev) {
   const int numSteps = baseline_.size();
 
   auto start = scanForward ? 0 : numSteps - 1;
@@ -132,7 +131,7 @@ void RangingScanner::scan(bool scanForward, size_t minLockPoints,
       printf("%d: %d %hd\n", i, (int)status, distance);
 
       if (auto center = tracker.update(i, distance < baseline_[i])) {
-        cb(*center * rotationStep);
+        ev.post(*center * rotationStep);
       }
     } else {
       printf("%d: scan failed\n", i);
@@ -141,7 +140,7 @@ void RangingScanner::scan(bool scanForward, size_t minLockPoints,
 }
 
 void RangingScanner::search(size_t minLockPoints, size_t maxBreakPoints,
-                            mbed::Callback<void(float)> cb) {
-  scan(false, minLockPoints, maxBreakPoints, cb);
-  scan(true, minLockPoints, maxBreakPoints, cb);
+                            TargetEvent &ev) {
+  scan(false, minLockPoints, maxBreakPoints, ev);
+  scan(true, minLockPoints, maxBreakPoints, ev);
 }
