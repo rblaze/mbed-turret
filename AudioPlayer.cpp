@@ -1,27 +1,4 @@
 #include "AudioPlayer.h"
-#include "PCM_I_see_you.h"
-#include "PCM_are_you_still_there.h"
-#include "PCM_deploying.h"
-#include "PCM_hello_friend.h"
-#include "PCM_sfx_active.h"
-#include "PCM_sfx_deploy.h"
-#include "PCM_sfx_retract.h"
-#include "PCM_target_lost.h"
-
-const std::unordered_map<AudioPlayer::Clip, AudioPlayer::Data>
-    AudioPlayer::clips_{
-        {Clip::ARE_YOU_STILL_THERE, Data(Turret_are_you_still_there_raw,
-                                         Turret_are_you_still_there_raw_len)},
-        {Clip::DEPLOYING, Data(Turret_deploying_raw, Turret_deploying_raw_len)},
-        {Clip::HELLO_FRIEND,
-         Data(Turret_hello_friend_raw, Turret_hello_friend_raw_len)},
-        {Clip::I_SEE_YOU, Data(Turret_I_see_you_raw, Turret_I_see_you_raw_len)},
-        {Clip::SFX_ACTIVE, Data(Turret_active_raw, Turret_active_raw_len)},
-        {Clip::SFX_DEPLOY, Data(Turret_deploy_raw, Turret_deploy_raw_len)},
-        {Clip::SFX_RETRACT, Data(Turret_retract_raw, Turret_retract_raw_len)},
-        {Clip::TARGET_LOST,
-         Data(Turret_target_lost_raw, Turret_target_lost_raw_len)},
-    };
 
 AudioPlayer::AudioPlayer(PinName pin)
     : sharedQueue_{mbed_event_queue()},
@@ -29,34 +6,91 @@ AudioPlayer::AudioPlayer(PinName pin)
   // Audio samples are at 16KHz.
   // Set PWM to 4x this frequency.
   pwm_.period(1.0 / (kFreq * 4.0));
+
+  scanDir(Clip::STARTUP, "startup");
+  scanDir(Clip::BEGIN_SCAN, "begin_scan");
+  scanDir(Clip::TARGET_ACQUIRED, "target_acquired");
+  scanDir(Clip::CONTACT_LOST, "contact_lost");
+  scanDir(Clip::CONTACT_RESTORED, "contact_restored");
+  scanDir(Clip::TARGET_LOST, "target_lost");
+  scanDir(Clip::PICKED_UP, "picked_up");
 }
 
-// clip_ only changed from event queue, no synchronization necessary.
-// Until it is single-threaded, that is.
+void AudioPlayer::scanDir(Clip clip, const std::string &path) {
+  Dir dir(FileSystem::get_default_instance(), path.c_str());
+  struct dirent entry;
+
+  printf("clip %d\n", (int)clip);
+  while (dir.read(&entry) == 1) {
+    if (entry.d_type != DT_REG) {
+      continue;
+    }
+
+    printf("file %s\n", entry.d_name);
+    clips_[clip].push_back(path + "/" + entry.d_name);
+  }
+}
 
 void AudioPlayer::playClip(Clip clip) {
-  if (!clip_) {
-    auto p = clips_.find(clip);
+  if (file_ == nullptr) {
+    size_t numClips = clips_[clip].size();
 
-    if (p != clips_.end()) {
-      clip_ = p->second;
-      position_ = 0;
-      ticker_.attach_us(callback(this, &AudioPlayer::nextSample),
-                        1000000 / kFreq);
+    if (numClips > 0) {
+      size_t index = time(nullptr) % numClips;
+      auto path = clips_[clip][index];
+
+      file_ = std::make_unique<File>(FileSystem::get_default_instance(), path.c_str(), O_RDONLY);
+      if (file_) {
+        printf("playing %s\n", path.c_str());
+        ssize_t read = file_->read(buf_.data(), buf_.size());
+        if (read > 0) {
+          position_ = 0;
+          lastSample_ = buf_.size();
+          ticker_.attach_us(callback(this, &AudioPlayer::nextSample),
+                            1000000 / kFreq);
+        } else {
+          sharedQueue_->call(this, &AudioPlayer::endClip);
+        }
+      }
     }
   }
 }
 
-void AudioPlayer::clipFinished() { clip_ = std::experimental::nullopt; }
+void AudioPlayer::endClip() {
+  pwm_.write(0);
+  file_.reset();
+  printf("done %d\n", position_);
+}
+
+void AudioPlayer::readNextBuffer() {
+  ssize_t readPos = lastSample_ >= buf_.size() ? 0 : lastSample_;
+  ssize_t readSize = std::min(kBlockSize, buf_.size() - readPos);
+  ssize_t read = file_->read(buf_.data() + readPos, readSize);
+  if (read > 0) {
+    lastSample_ = readPos + read;
+  }
+//  printf("read %d %d %d %d\n", readPos, readSize, position_, lastSample_);
+}
 
 void AudioPlayer::nextSample() {
-  MBED_ASSERT(clip_);
+  uint16_t sample = buf_[position_];
+  sample <<= 8;
+  sample += buf_[position_ + 1];
+  // Shift from signed to unsigned 16-bit.
+  sample += 0x8000;
+  pwm_.write((double)(sample) / 65536.0);
+  position_ += sizeof(int16_t);
 
-  if (position_ >= clip_->size()) {
+  if (position_ == lastSample_) {
     ticker_.detach();
-    sharedQueue_->call(this, &AudioPlayer::clipFinished);
+    sharedQueue_->call(this, &AudioPlayer::endClip);
   } else {
-    pwm_.write((double)(*clip_)[position_] / 255.0);
-    position_ += 1;
+    if (position_ % kBlockSize == 0) {
+      sharedQueue_->call(this, &AudioPlayer::readNextBuffer);
+    }
+
+    if (position_ >= buf_.size()) {
+      position_ = 0;
+    }
   }
 }

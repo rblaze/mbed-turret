@@ -1,0 +1,28 @@
+{
+    "config": {
+        "AUDIO_PWM": null
+    },
+    "target_overrides": {
+        "NUCLEO_F103RB": {
+            "target.components_add": ["SPIF"],
+            "spif-driver.SPI_MOSI": "PB_5",
+            "spif-driver.SPI_MISO": "PB_4",
+            "spif-driver.SPI_CLK": "PB_3",
+            "spif-driver.SPI_CS": "PA_15",
+            "events.shared-dispatch-from-application": "true",
+            "app.AUDIO_PWM": "PA_8"
+        },
+        "NUCLEO_F446ZE": {
+            "target.components_add": ["SPIF"],
+            "spif-driver.SPI_MOSI": "PE_6",
+            "spif-driver.SPI_MISO": "PE_5",
+            "spif-driver.SPI_CLK": "PE_2",
+            "spif-driver.SPI_CS": "PE_4",
+            "events.shared-dispatch-from-application": "true",
+            "app.AUDIO_PWM": "PA_3"
+        },
+        "K64F": {
+            "platform.stdio-baud-rate": 9600
+        }
+    }
+}

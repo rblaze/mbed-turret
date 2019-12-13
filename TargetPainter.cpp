@@ -10,17 +10,13 @@ TargetPainter::TargetPainter(FastServo &servo, DigitalOut &laser,
 // This removes the need for synchronization.
 
 void TargetPainter::targetLost() {
-  if ((time(nullptr) % 2) == 0) {
-    player_.post(AudioPlayer::Clip::TARGET_LOST);
-  } else {
-    player_.post(AudioPlayer::Clip::ARE_YOU_STILL_THERE);
-  }
+  player_.post(AudioPlayer::Clip::TARGET_LOST);
   timeoutEventId_ = 0;
 }
 
 void TargetPainter::turnOffLaser() {
   laser_.write(0);
-  player_.post(AudioPlayer::Clip::SFX_RETRACT);
+  player_.post(AudioPlayer::Clip::CONTACT_LOST);
   timeoutEventId_ =
       sharedQueue_->call_in(targetLostDelay, this, &TargetPainter::targetLost);
 }
@@ -30,13 +26,9 @@ void TargetPainter::turnOnLaser(float pos) {
 
   if (laser_.read() == 0) {
     if (now - lastContact_ > recentContactThreshold || lastContact_ == 0) {
-      if ((time(nullptr) % 2) == 0) {
-        player_.post(AudioPlayer::Clip::HELLO_FRIEND);
-      } else {
-        player_.post(AudioPlayer::Clip::I_SEE_YOU);
-      }
+      player_.post(AudioPlayer::Clip::TARGET_ACQUIRED);
     } else {
-      player_.post(AudioPlayer::Clip::SFX_ACTIVE);
+      player_.post(AudioPlayer::Clip::CONTACT_RESTORED);
     }
   }
 
