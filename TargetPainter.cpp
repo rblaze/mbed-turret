@@ -1,3 +1,4 @@
+#if 0
 #include "TargetPainter.h"
 
 TargetPainter::TargetPainter(FastServo &servo, DigitalOut &laser,
@@ -45,3 +46,4 @@ void TargetPainter::turnOnLaser(float pos) {
   timeoutEventId_ =
       sharedQueue_->call_in(laserOffDelay, this, &TargetPainter::turnOffLaser);
 }
+#endif

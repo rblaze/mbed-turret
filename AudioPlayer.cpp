@@ -1,96 +1,133 @@
 #include "AudioPlayer.h"
+#include "FastPWM.h"
+#include "LittleFileSystem.h"
+#include "SPIFBlockDevice.h"
+#include "mbed.h"
 
-AudioPlayer::AudioPlayer(PinName pin)
-    : sharedQueue_{mbed_event_queue()},
-      playEvent_{sharedQueue_->event(this, &AudioPlayer::playClip)}, pwm_{pin} {
-  // Audio samples are at 16KHz.
-  // Set PWM to 4x this frequency.
-  pwm_.period(1.0 / (kFreq * 4.0));
+namespace {
 
-  scanDir(Clip::STARTUP, "startup");
-  scanDir(Clip::BEGIN_SCAN, "begin_scan");
-  scanDir(Clip::TARGET_ACQUIRED, "target_acquired");
-  scanDir(Clip::CONTACT_LOST, "contact_lost");
-  scanDir(Clip::CONTACT_RESTORED, "contact_restored");
-  scanDir(Clip::TARGET_LOST, "target_lost");
-  scanDir(Clip::PICKED_UP, "picked_up");
-}
+struct ClipList {
+  size_t count;
+  const char **files;
+};
 
-void AudioPlayer::scanDir(Clip clip, const std::string &path) {
-  Dir dir(FileSystem::get_default_instance(), path.c_str());
-  struct dirent entry;
+// Clips are unsigned 8 bit, 16 KHz.
+constexpr uint32_t kFreq = 16000;
+constexpr size_t kBlockSize = 1024;
 
-  printf("clip %d\n", (int)clip);
-  while (dir.read(&entry) == 1) {
-    if (entry.d_type != DT_REG) {
-      continue;
+const char *startup[] = {"Turret_sfx_deploy.raw", "Turret_sfx_active.raw"};
+const char *begin_scan[] = {"Turret_searching.raw", "Turret_activated.raw",
+                            "Turret_sentry_mode_activated.raw",
+                            "Turret_would_you_come_over_here.raw",
+                            "Turret_deploying.raw"};
+const char *target_acquired[] = {
+    "Turret_hello_friend.raw",    "Turret_who_is_there.raw",
+    "Turret_target_acquired.raw", "Turret_gotcha.raw",
+    "Turret_I_see_you.raw",       "Turret_there_you_are.raw"};
+const char *contact_lost[] = {"Turret_sfx_retract.raw"};
+const char *contact_restored[] = {"Turret_sfx_ping.raw", "Turret_hi.raw",
+                                  "Turret_sfx_alert.raw"};
+const char *target_lost[] = {
+    "Turret_is_anyone_there.raw", "Turret_hellooooo.raw",
+    "Turret_are_you_still_there.raw", "Turret_target_lost.raw"};
+const char *picked_up[] = {"Turret_malfunctioning.raw",
+                           "Turret_put_me_down.raw", "Turret_who_are_you.raw",
+                           "Turret_please_put_me_down.raw"};
+
+constexpr ClipList clips[] = {
+    {sizeof(startup) / sizeof(const char *), startup},
+    {sizeof(begin_scan) / sizeof(const char *), begin_scan},
+    {sizeof(target_acquired) / sizeof(const char *), target_acquired},
+    {sizeof(contact_lost) / sizeof(const char *), contact_lost},
+    {sizeof(contact_restored) / sizeof(const char *), contact_restored},
+    {sizeof(target_lost) / sizeof(const char *), target_lost},
+    {sizeof(picked_up) / sizeof(const char *), picked_up}};
+
+SPIFBlockDevice spif(MBED_CONF_SPIF_DRIVER_SPI_MOSI,
+                     MBED_CONF_SPIF_DRIVER_SPI_MISO,
+                     MBED_CONF_SPIF_DRIVER_SPI_CLK,
+                     MBED_CONF_SPIF_DRIVER_SPI_CS);
+LittleFileSystem fs("fs", &spif);
+
+FastPWM pwm{MBED_CONF_APP_AUDIO_PWM};
+Ticker ticker;
+File file;
+
+bool playing{false};
+bool cleanup{false};
+uint8_t buf[kBlockSize * 2];
+size_t position;
+size_t lastSample;
+bool readNextBuffer;
+
+// Play single sample from buffer
+void playSample() {
+  // precondition - there is sample to play
+  double sample = buf[position];
+  pwm.write(sample / 256.0);
+  position += 1;
+
+  if (position == lastSample) {
+    ticker.detach();
+    pwm.write(0);
+    cleanup = true;
+  } else {
+    if (position % kBlockSize == 0) {
+      readNextBuffer = true;
     }
 
-    printf("file %s\n", entry.d_name);
-    clips_[clip].push_back(path + "/" + entry.d_name);
+    if (position >= sizeof(buf)) {
+      position = 0;
+    }
   }
 }
 
-void AudioPlayer::playClip(Clip clip) {
-  if (file_ == nullptr) {
-    size_t numClips = clips_[clip].size();
+} // namespace
 
-    if (numClips > 0) {
-      size_t index = time(nullptr) % numClips;
-      auto path = clips_[clip][index];
+void Audio::init() {
+  pwm.period_us(4);
+}
 
-      file_ = std::make_unique<File>(FileSystem::get_default_instance(), path.c_str(), O_RDONLY);
-      if (file_) {
-        printf("playing %s\n", path.c_str());
-        ssize_t read = file_->read(buf_.data(), buf_.size());
-        if (read > 0) {
-          position_ = 0;
-          lastSample_ = buf_.size();
-          ticker_.attach_us(callback(this, &AudioPlayer::nextSample),
-                            1000000 / kFreq);
-        } else {
-          sharedQueue_->call(this, &AudioPlayer::endClip);
-        }
+void Audio::play(Audio::Clip clip) {
+  if (!playing) {
+    MBED_ASSERT(cleanup == false);
+
+    auto list = clips[(int)clip];
+    size_t index = random() % list.count;
+    auto path = list.files[index];
+
+    int status = file.open(&fs, path, O_RDONLY);
+    if (status == 0) {
+      ssize_t read = file.read(buf, sizeof(buf));
+      if (read > 0) {
+        position = 0;
+        lastSample = read;
+        readNextBuffer = false;
+        playing = true;
+        ticker.attach_us(&playSample, 1000000 / kFreq);
+      } else {
+        file.close();
       }
     }
   }
 }
 
-void AudioPlayer::endClip() {
-  pwm_.write(0);
-  file_.reset();
-  printf("done %d\n", position_);
-}
-
-void AudioPlayer::readNextBuffer() {
-  ssize_t readPos = lastSample_ >= buf_.size() ? 0 : lastSample_;
-  ssize_t readSize = std::min(kBlockSize, buf_.size() - readPos);
-  ssize_t read = file_->read(buf_.data() + readPos, readSize);
-  if (read > 0) {
-    lastSample_ = readPos + read;
+void Audio::tick() {
+  if (cleanup) {
+    cleanup = false;
+    playing = false;
+    file.close();
   }
-//  printf("read %d %d %d %d\n", readPos, readSize, position_, lastSample_);
-}
 
-void AudioPlayer::nextSample() {
-  uint16_t sample = buf_[position_];
-  sample <<= 8;
-  sample += buf_[position_ + 1];
-  // Shift from signed to unsigned 16-bit.
-  sample += 0x8000;
-  pwm_.write((double)(sample) / 65536.0);
-  position_ += sizeof(int16_t);
+  if (playing) {
+    if (readNextBuffer) {
+      readNextBuffer = false;
 
-  if (position_ == lastSample_) {
-    ticker_.detach();
-    sharedQueue_->call(this, &AudioPlayer::endClip);
-  } else {
-    if (position_ % kBlockSize == 0) {
-      sharedQueue_->call(this, &AudioPlayer::readNextBuffer);
-    }
-
-    if (position_ >= buf_.size()) {
-      position_ = 0;
+      ssize_t readPos = lastSample >= sizeof(buf) ? 0 : lastSample;
+      ssize_t read = file.read(buf + readPos, kBlockSize);
+      if (read > 0) {
+        lastSample = readPos + read;
+      }
     }
   }
 }
