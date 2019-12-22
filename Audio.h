@@ -16,4 +16,4 @@ void init();
 void play(Clip);
 void tick();
 
-} // namespace Audio
+}  // namespace Audio
