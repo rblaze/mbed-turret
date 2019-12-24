@@ -130,7 +130,9 @@ void Audio::play(Audio::Clip clip) {
   }
 }
 
-void Audio::tick() {
+bool Audio::tick() {
+  bool workDone{false};
+
   switch (state) {
     case State::IDLE:
     case State::PLAYING:
@@ -149,11 +151,16 @@ void Audio::tick() {
       if (rd != kBlockSize) {
         state = State::DRAINING;
       }
-    } break;
+
+      workDone = true;
+      break;
+    }
     case State::STOPPED:
+      printf("done %d %d\n", position, lastSample);
       file.close();
       state = State::IDLE;
-      printf("done\n");
       break;
   }
+
+  return workDone;
 }

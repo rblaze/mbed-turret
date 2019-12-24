@@ -31,6 +31,10 @@ public:
     return Point{mean_, stddev};
   }
 
+  int count() {
+    return count_;
+  }
+
 private:
   int count_{0};
   float mean_{0};

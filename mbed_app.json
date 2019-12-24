@@ -1,6 +1,10 @@
 {
     "config": {
-        "AUDIO_PWM": null
+        "AUDIO_PWM": null,
+	"SENSOR_SCL": "I2C_SCL",
+        "SENSOR_SDA": "I2C_SDA",
+	"SENSOR_SERVO": null,
+	"SENSOR_ANGLE_POT": null
     },
     "target_overrides": {
         "NUCLEO_F103RB": {
@@ -9,7 +13,9 @@
             "spif-driver.SPI_MISO": "PB_14",
             "spif-driver.SPI_CLK": "PB_13",
             "spif-driver.SPI_CS": "PB_12",
-            "app.AUDIO_PWM": "PA_1"
+            "app.AUDIO_PWM": "PA_1",
+            "app.SENSOR_SERVO": "PB_4",
+            "app.SENSOR_ANGLE_POT": "PA_0"
         }
     }
 }
