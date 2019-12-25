@@ -21,7 +21,7 @@ enum class State {
 
 // Clips are unsigned 8 bit, 16 KHz.
 constexpr uint32_t kFreq = 16000;
-constexpr size_t kBlockSize = 1024;
+constexpr size_t kBlockSize = 900;
 
 const char *startup[] = {
     "Turret_sfx_deploy.raw",

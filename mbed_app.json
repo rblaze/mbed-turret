@@ -4,7 +4,9 @@
 	"SENSOR_SCL": "I2C_SCL",
         "SENSOR_SDA": "I2C_SDA",
 	"SENSOR_SERVO": null,
-	"SENSOR_ANGLE_POT": null
+	"SENSOR_ANGLE_POT": null,
+	"LASER_SERVO": null,
+	"LASER_POWER": null
     },
     "target_overrides": {
         "NUCLEO_F103RB": {
@@ -13,9 +15,11 @@
             "spif-driver.SPI_MISO": "PB_14",
             "spif-driver.SPI_CLK": "PB_13",
             "spif-driver.SPI_CS": "PB_12",
-            "app.AUDIO_PWM": "PA_1",
-            "app.SENSOR_SERVO": "PB_4",
-            "app.SENSOR_ANGLE_POT": "PA_0"
+            "app.AUDIO_PWM": "A1",
+            "app.SENSOR_SERVO": "D5",
+            "app.SENSOR_ANGLE_POT": "A0",
+            "app.LASER_SERVO": "D7",
+            "app.LASER_POWER": "D4"
         }
     }
 }

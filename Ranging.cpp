@@ -1,7 +1,9 @@
 #include "Ranging.h"
-#include <FastServo.h>
+#include "Audio.h"
 #include "Calibration.h"
+#include "FastServo.h"
 #include "LaserSensor.h"
+#include "Targeting.h"
 #include "mbed.h"
 
 namespace {
@@ -72,7 +74,7 @@ void calibration_step() {
   VL53L1X_GetResult(sensorId, &result);
   VL53L1X_ClearInterrupt(sensorId);
 
-//  printf("sample: %hu\n", result.Distance);
+  // printf("sample: %hu\n", result.Distance);
   cal.add_sample(result.Distance);
 
   if (cal.count() == kNumCalibrations) {
@@ -81,11 +83,12 @@ void calibration_step() {
 
     baseline[currentStep] =
         std::lround(result.mean > threshold ? result.mean - threshold : 0);
-//    printf("value: %hu\n", baseline[currentStep]);
+    // printf("value: %hu\n", baseline[currentStep]);
 
     if (currentStep == numSteps - 1) {
       // Done calibrating, start scanning.
       state = State::DOWNSCAN_MEASURE;
+      Audio::play(Audio::Clip::BEGIN_SCAN);
     } else {
       VL53L1X_StopRanging(sensorId);
       setServo(currentStep + 1);
@@ -110,10 +113,12 @@ void scan_step(int step, size_t border, State nextState, State switchState) {
 
   // printf("sample: %hu\n", result.Distance);
 
-  // TODO process
+  Targeting::report(currentStep,
+                    result.Distance < baseline[currentStep]);
 
   if (currentStep == border) {
     // Switch direction
+    Targeting::resetState();
     state = switchState;
   } else {
     VL53L1X_StopRanging(sensorId);
@@ -157,6 +162,9 @@ void Ranging::init(float range, float angle) {
   // Set timings.
   VL53L1X_SetTimingBudgetInMs(sensorId, 100);
   VL53L1X_SetInterMeasurementInMs(sensorId, 200);
+
+  // SFX
+  Audio::play(Audio::Clip::STARTUP);
 }
 
 void Ranging::tick() {

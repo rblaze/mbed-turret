@@ -1,5 +1,6 @@
 #include "Audio.h"
 #include "Ranging.h"
+#include "Targeting.h"
 #include "mbed.h"
 
 constexpr float servoRangeMin{0.0003};
@@ -26,15 +27,14 @@ int main() {
     float range = servoRangeMin + (servoRangeMax - servoRangeMin) * pct;
     float angle = servoAngleMin + (servoAngleMax - servoAngleMin) * pct;
 
-    printf("calibrate %f %f %f\n", pct, range, angle);
     Ranging::init(range, angle);
+    Targeting::init(range, angle);
   }
-
-  Audio::play(Audio::Clip::TARGET_ACQUIRED);
 
   for (;;) {
     Audio::tick();
     Ranging::tick();
+    Targeting::tick();
     ThisThread::sleep_for(10);
   }
 }
