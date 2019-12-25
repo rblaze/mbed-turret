@@ -33,10 +33,8 @@ int main() {
   Audio::play(Audio::Clip::TARGET_ACQUIRED);
 
   for (;;) {
-    if (!Audio::tick()) {
-      // Audio is time-sensitive. Do other work only if it was noop.
-      Ranging::tick();
-    }
+    Audio::tick();
+    Ranging::tick();
     ThisThread::sleep_for(10);
   }
 }

@@ -19,7 +19,10 @@ uint16_t sensorId;
 enum class State {
   CALIBRATION_MOVE,
   CALIBRATION_MEASURE,
-  TODO,
+  DOWNSCAN_MOVE,
+  DOWNSCAN_MEASURE,
+  UPSCAN_MOVE,
+  UPSCAN_MEASURE,
 } state;
 
 // Timings
@@ -45,11 +48,12 @@ void setServo(size_t pos) {
   currentStep = pos;
 }
 
-bool waitState(State nextState) {
+bool waitMove(State nextState) {
   bool expired = Kernel::get_ms_count() < wait_until;
 
   if (expired) {
     state = nextState;
+    VL53L1X_StartRanging(sensorId);
   }
 
   return expired;
@@ -79,16 +83,43 @@ void calibration_step() {
         std::lround(result.mean > threshold ? result.mean - threshold : 0);
 //    printf("value: %hu\n", baseline[currentStep]);
 
-    VL53L1X_StopRanging(sensorId);
-
     if (currentStep == numSteps - 1) {
       // Done calibrating, start scanning.
-      state = State::TODO;
+      state = State::DOWNSCAN_MEASURE;
     } else {
+      VL53L1X_StopRanging(sensorId);
       setServo(currentStep + 1);
       wait_until = Kernel::get_ms_count() + kServoStepWaitMs;
       state = State::CALIBRATION_MOVE;
     }
+  }
+}
+
+void scan_step(int step, size_t border, State nextState, State switchState) {
+  uint8_t ready{0};
+
+  VL53L1X_CheckForDataReady(sensorId, &ready);
+  if (!ready) {
+    // Try again
+    return;
+  }
+
+  VL53L1X_Result_t result;
+  VL53L1X_GetResult(sensorId, &result);
+  VL53L1X_ClearInterrupt(sensorId);
+
+  // printf("sample: %hu\n", result.Distance);
+
+  // TODO process
+
+  if (currentStep == border) {
+    // Switch direction
+    state = switchState;
+  } else {
+    VL53L1X_StopRanging(sensorId);
+    setServo(currentStep + step);
+    wait_until = Kernel::get_ms_count() + kServoStepWaitMs;
+    state = nextState;
   }
 }
 
@@ -131,17 +162,25 @@ void Ranging::init(float range, float angle) {
 void Ranging::tick() {
   switch (state) {
     case State::CALIBRATION_MOVE:
-      if (waitState(State::CALIBRATION_MEASURE)) {
-        VL53L1X_StartRanging(sensorId);
+      if (waitMove(State::CALIBRATION_MEASURE)) {
         // Reset calibration data collector.
         cal = CalibrationData();
-        state = State::CALIBRATION_MEASURE;
       }
       break;
     case State::CALIBRATION_MEASURE:
       calibration_step();
       break;
-    case State::TODO:
+    case State::DOWNSCAN_MOVE:
+      waitMove(State::DOWNSCAN_MEASURE);
+      break;
+    case State::DOWNSCAN_MEASURE:
+      scan_step(-1, 0, State::DOWNSCAN_MOVE, State::UPSCAN_MEASURE);
+      break;
+    case State::UPSCAN_MOVE:
+      waitMove(State::UPSCAN_MEASURE);
+      break;
+    case State::UPSCAN_MEASURE:
+      scan_step(1, numSteps - 1, State::UPSCAN_MOVE, State::DOWNSCAN_MEASURE);
       break;
   }
 }

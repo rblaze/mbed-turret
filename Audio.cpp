@@ -130,9 +130,7 @@ void Audio::play(Audio::Clip clip) {
   }
 }
 
-bool Audio::tick() {
-  bool workDone{false};
-
+void Audio::tick() {
   switch (state) {
     case State::IDLE:
     case State::PLAYING:
@@ -152,7 +150,6 @@ bool Audio::tick() {
         state = State::DRAINING;
       }
 
-      workDone = true;
       break;
     }
     case State::STOPPED:
@@ -161,6 +158,4 @@ bool Audio::tick() {
       state = State::IDLE;
       break;
   }
-
-  return workDone;
 }

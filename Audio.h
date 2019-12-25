@@ -14,6 +14,6 @@ enum class Clip {
 
 void init();
 void play(Clip);
-bool tick();
+void tick();
 
 }  // namespace Audio
