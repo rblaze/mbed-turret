@@ -89,6 +89,8 @@ void calibration_step() {
     if (currentStep == numSteps - 1) {
       // Done calibrating, start scanning.
       state = State::DOWNSCAN_MEASURE;
+      // Re-Init PRNG
+      srandom(Kernel::get_ms_count());
       Audio::play(Audio::Clip::BEGIN_SCAN);
     } else {
       VL53L1X_StopRanging(sensorId);
@@ -165,6 +167,8 @@ void Ranging::init(float range, float angle) {
   VL53L1X_SetTimingBudgetInMs(sensorId, 100);
   VL53L1X_SetInterMeasurementInMs(sensorId, 200);
 
+  // Init PRNG
+  srandom(Kernel::get_ms_count());
   // SFX
   Audio::play(Audio::Clip::STARTUP);
 }
