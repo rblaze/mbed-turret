@@ -13,6 +13,7 @@ constexpr int kNumSigma{2};
 constexpr float kMinDiff{100};
 
 // Hardware
+DigitalOut led{MBED_CONF_APP_CONTACT_LED, 0};
 FastServo servo{MBED_CONF_APP_SENSOR_SERVO};
 I2C i2c{MBED_CONF_APP_SENSOR_SDA, MBED_CONF_APP_SENSOR_SCL};
 uint16_t sensorId;
@@ -113,8 +114,9 @@ void scan_step(int step, size_t border, State nextState, State switchState) {
 
   // printf("sample: %hu\n", result.Distance);
 
-  Targeting::report(currentStep,
-                    result.Distance < baseline[currentStep]);
+  auto hasContact{result.Distance < baseline[currentStep]};
+  led.write(hasContact);
+  Targeting::report(currentStep, hasContact);
 
   if (currentStep == border) {
     // Switch direction

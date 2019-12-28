@@ -21,7 +21,7 @@ size_t contactStart;
 size_t contactEnd;
 int contactGap;
 
-uint64_t lastContactAtMs{0};
+uint64_t lastSeenAtMs{0};
 uint64_t eventTimeMs{0};
 enum class DelayedEvent {
   LASER_OFF,
@@ -69,7 +69,7 @@ void Targeting::report(size_t currentStep, bool hasContact) {
 
       // SFX
       if (laser.read() == 0) {
-        if (Kernel::get_ms_count() - lastContactAtMs > kTargetAcquiredInterval) {
+        if (Kernel::get_ms_count() - lastSeenAtMs > kTargetAcquiredInterval) {
           Audio::play(Audio::Clip::TARGET_ACQUIRED);
         } else {
           Audio::play(Audio::Clip::CONTACT_RESTORED);
@@ -91,8 +91,6 @@ void Targeting::report(size_t currentStep, bool hasContact) {
       // Target lost.
       resetState();
     }
-
-    lastContactAtMs = Kernel::get_ms_count();
   }
 }
 
@@ -102,6 +100,7 @@ void Targeting::tick() {
     if (now >= eventTimeMs) {
       switch (event) {
         case DelayedEvent::LASER_OFF:
+          lastSeenAtMs = now;
           laser = 0;
           Audio::play(Audio::Clip::CONTACT_LOST);
           eventTimeMs = now + kTargetLostInterval;

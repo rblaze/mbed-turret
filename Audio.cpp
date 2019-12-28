@@ -6,6 +6,13 @@
 
 namespace {
 
+// Hardware
+FastPWM pwm{MBED_CONF_APP_AUDIO_PWM};
+SPIFBlockDevice spif{
+    MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
+    MBED_CONF_SPIF_DRIVER_SPI_CLK, MBED_CONF_SPIF_DRIVER_SPI_CS};
+LittleFileSystem fs{"fs", &spif};
+
 struct ClipList {
   size_t count;
   const char **files;
@@ -67,12 +74,6 @@ constexpr ClipList clips[] = {
     {sizeof(target_lost) / sizeof(const char *), target_lost},
     {sizeof(picked_up) / sizeof(const char *), picked_up}};
 
-FastPWM pwm{MBED_CONF_APP_AUDIO_PWM};
-SPIFBlockDevice spif{
-    MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
-    MBED_CONF_SPIF_DRIVER_SPI_CLK, MBED_CONF_SPIF_DRIVER_SPI_CS};
-LittleFileSystem fs{"fs", &spif};
-
 Ticker ticker;
 File file;
 
@@ -110,6 +111,7 @@ void Audio::init() {
 }
 
 void Audio::play(Audio::Clip clip) {
+  printf("play %d %d\n", (int)clip, (int)state);
   if (state == State::IDLE) {
     auto list = clips[(int)clip];
     size_t index = random() % list.count;
