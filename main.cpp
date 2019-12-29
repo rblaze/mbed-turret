@@ -12,7 +12,6 @@ constexpr size_t servoAngleMax{90};
 int main() {
   printf("Starting\n");
 
-  Audio::init();
   {
     AnalogIn pot{MBED_CONF_APP_SENSOR_ANGLE_POT};
     float pct{pot.read()};
@@ -27,6 +26,11 @@ int main() {
     float range = servoRangeMin + (servoRangeMax - servoRangeMin) * pct;
     float angle = servoAngleMin + (servoAngleMax - servoAngleMin) * pct;
 
+    // Init PRGN
+    srandom(pot.read_u16());
+
+    // Init modules.
+    Audio::init();
     Ranging::init(range, angle);
     Targeting::init(range, angle);
   }
@@ -35,6 +39,8 @@ int main() {
     Audio::tick();
     Ranging::tick();
     Targeting::tick();
+
+    // Tick every 10ms if there is no interrupts.
     ThisThread::sleep_for(10);
   }
 }

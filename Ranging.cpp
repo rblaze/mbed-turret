@@ -167,8 +167,6 @@ void Ranging::init(float range, float angle) {
   VL53L1X_SetTimingBudgetInMs(sensorId, 100);
   VL53L1X_SetInterMeasurementInMs(sensorId, 200);
 
-  // Init PRNG
-  srandom(Kernel::get_ms_count());
   // SFX
   Audio::play(Audio::Clip::STARTUP);
 }
