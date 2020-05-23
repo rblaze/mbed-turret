@@ -1,18 +1,21 @@
 #include "Audio.h"
+
+#include <FastPWM.h>
 #include <LittleFileSystem.h>
 #include <SPIFBlockDevice.h>
-#include "FastPWM.h"
-#include "mbed.h"
+#include <mbed.h>
 
 namespace {
 
 // Hardware
 FastPWM pwm{MBED_CONF_APP_AUDIO_PWM};
+DigitalOut mute{MBED_CONF_APP_AUDIO_MUTE, 1};
 SPIFBlockDevice spif{
     MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
     MBED_CONF_SPIF_DRIVER_SPI_CLK, MBED_CONF_SPIF_DRIVER_SPI_CS};
 LittleFileSystem fs{"fs", &spif};
 
+// Data structures
 struct ClipList {
   size_t count;
   const char **files;
@@ -21,9 +24,7 @@ struct ClipList {
 enum class State {
   IDLE,
   PLAYING,
-  PLAYING_READING,
   DRAINING,
-  STOPPED,
 };
 
 // Clips are unsigned 8 bit, 16 KHz.
@@ -79,8 +80,42 @@ File file;
 
 uint8_t buf[kBlockSize * 2];
 size_t position;
-size_t lastSample;
+volatile size_t lastSample;
 State state{State::IDLE};
+
+void playSample();
+
+void startClip() {
+  mute = 0;
+  ticker.attach(&playSample, 1000000us / kFreq);
+}
+
+void readNext() {
+  ssize_t readPos = lastSample >= sizeof(buf) ? 0 : lastSample;
+  ssize_t rd = file.read(buf + readPos, kBlockSize);
+
+  if (rd > 0) {
+    lastSample = readPos + rd;
+  }
+
+  if (rd != kBlockSize) {
+    state = State::DRAINING;
+  }
+}
+
+void endClip() {
+  pwm.write(0);
+  mute = 1;
+  file.close();
+  state = State::IDLE;
+
+  printf("done %d %d\n", position, lastSample);
+}
+
+auto queue{mbed_event_queue()};
+auto startClipEvent{queue->make_user_allocated_event(startClip)};
+auto readNextEvent{queue->make_user_allocated_event(readNext)};
+auto endClipEvent{queue->make_user_allocated_event(endClip)};
 
 // Play single sample from buffer
 void playSample() {
@@ -91,11 +126,10 @@ void playSample() {
 
   if (position == lastSample) {
     ticker.detach();
-    pwm.write(0);
-    state = State::STOPPED;
+    endClipEvent.call();
   } else {
     if (position % kBlockSize == 0 && state == State::PLAYING) {
-      state = State::PLAYING_READING;
+      readNextEvent.call();
     }
 
     if (position >= sizeof(buf)) {
@@ -112,6 +146,7 @@ void Audio::init() {
 
 void Audio::play(Audio::Clip clip) {
   printf("play %d %d\n", (int)clip, (int)state);
+
   if (state == State::IDLE) {
     auto list = clips[(int)clip];
     size_t index = random() % list.count;
@@ -123,41 +158,11 @@ void Audio::play(Audio::Clip clip) {
       if (read > 0) {
         position = 0;
         lastSample = read;
-        state = State::PLAYING;
-        ticker.attach_us(&playSample, 1000000 / kFreq);
+        state = read == sizeof(buf) ? State::PLAYING : State::DRAINING;
+        startClipEvent.call();
       } else {
         file.close();
       }
     }
-  }
-}
-
-void Audio::tick() {
-  switch (state) {
-    case State::IDLE:
-    case State::PLAYING:
-    case State::DRAINING:
-      break;
-    case State::PLAYING_READING: {
-      ssize_t readPos = lastSample >= sizeof(buf) ? 0 : lastSample;
-      ssize_t rd = file.read(buf + readPos, kBlockSize);
-
-      state = State::PLAYING;
-
-      if (rd > 0) {
-        lastSample = readPos + rd;
-      }
-
-      if (rd != kBlockSize) {
-        state = State::DRAINING;
-      }
-
-      break;
-    }
-    case State::STOPPED:
-      printf("done %d %d\n", position, lastSample);
-      file.close();
-      state = State::IDLE;
-      break;
   }
 }

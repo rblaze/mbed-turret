@@ -1,10 +1,12 @@
 #include "Ranging.h"
+
+#include <FastServo.h>
+#include <LaserSensor.h>
+#include <mbed.h>
+
 #include "Audio.h"
 #include "Calibration.h"
-#include "FastServo.h"
-#include "LaserSensor.h"
 #include "Targeting.h"
-#include "mbed.h"
 
 namespace {
 // Ranging settings
@@ -14,23 +16,24 @@ constexpr float kMinDiff{100};
 
 // Hardware
 DigitalOut led{MBED_CONF_APP_CONTACT_LED, 0};
-FastServo servo{MBED_CONF_APP_SENSOR_SERVO};
+FastServo servo{MBED_CONF_APP_SENSOR_SERVO_PWM};
 I2C i2c{MBED_CONF_APP_SENSOR_SDA, MBED_CONF_APP_SENSOR_SCL};
 uint16_t sensorId;
 
 // FSM
-enum class State {
-  CALIBRATION_MOVE,
-  CALIBRATION_MEASURE,
-  DOWNSCAN_MOVE,
-  DOWNSCAN_MEASURE,
-  UPSCAN_MOVE,
-  UPSCAN_MEASURE,
-} state;
+enum class Direction {
+  CALIBRATION,
+  DOWNSCAN,
+  UPSCAN,
+} direction{Direction::CALIBRATION};
 
 // Timings
-constexpr uint64_t kServoResetWaitMs{500};
-constexpr uint64_t kServoStepWaitMs{100};
+// Force milliseconds here because some APIs expect this.
+using duration = std::chrono::milliseconds;
+constexpr duration kSensorTimingBudget{100ms};
+constexpr duration kSensorTimingInterval{200ms};
+constexpr duration kServoResetWaitTime{500ms};
+constexpr duration kServoStepWaitTime{100ms};
 
 // Ranging data
 constexpr size_t kMaxSteps{180};
@@ -40,73 +43,111 @@ size_t numSteps;  // Actual number of steps in scanning.
 size_t currentStep;
 float rotationStep;  // Angle increment on each step.
 
-// End time for *_WAIT
-uint64_t wait_until{0};
-
 CalibrationData cal;
 
+void beginScan();
+void readSensor();
+void rereadSensor();
+
+auto queue{mbed_event_queue()};
+auto beginScanEvent{queue->make_user_allocated_event(beginScan)};
+auto readSensorEvent{queue->make_user_allocated_event(readSensor)};
+auto rereadSensorEvent{queue->make_user_allocated_event(rereadSensor)};
+
 void setServo(size_t pos) {
-  printf("position %u\n", pos);
+  printf("setting position %u\n", pos);
   servo.write(pos * rotationStep);
   currentStep = pos;
 }
 
-bool waitMove(State nextState) {
-  bool expired = Kernel::get_ms_count() < wait_until;
+void processCalibration(uint16_t distance) {
+  cal.add_sample(distance);
 
-  if (expired) {
-    state = nextState;
-    VL53L1X_StartRanging(sensorId);
-  }
-
-  return expired;
-}
-
-void calibration_step() {
-  uint8_t ready{0};
-
-  VL53L1X_CheckForDataReady(sensorId, &ready);
-  if (!ready) {
-    // Try again
-    return;
-  }
-
-  VL53L1X_Result_t result;
-  VL53L1X_GetResult(sensorId, &result);
-  VL53L1X_ClearInterrupt(sensorId);
-
-  // printf("sample: %hu\n", result.Distance);
-  cal.add_sample(result.Distance);
-
-  if (cal.count() == kNumCalibrations) {
+  if (cal.count() < kNumCalibrations) {
+    // Wait for another measurment.
+    rereadSensorEvent.delay(kSensorTimingInterval.count());
+    rereadSensorEvent.call();
+  } else {
+    // Done with this sensor position.
     auto result = cal.finalize();
     auto threshold = std::max(result.stddev * kNumSigma, kMinDiff);
 
     baseline[currentStep] =
         std::lround(result.mean > threshold ? result.mean - threshold : 0);
-    // printf("value: %hu\n", baseline[currentStep]);
+    printf("value: %hu\n", baseline[currentStep]);
 
     if (currentStep == numSteps - 1) {
-      // Done calibrating, start scanning.
-      state = State::DOWNSCAN_MEASURE;
       // Re-Init PRNG
-      srandom(Kernel::get_ms_count());
+      srandom(random() ^ Kernel::Clock::now().time_since_epoch().count());
       Audio::play(Audio::Clip::BEGIN_SCAN);
+
+      // Done calibrating, start scanning.
+      direction = Direction::DOWNSCAN;
+      rereadSensorEvent.delay(kSensorTimingInterval.count());
+      rereadSensorEvent.call();
     } else {
+      // Next calibration step
       VL53L1X_StopRanging(sensorId);
       setServo(currentStep + 1);
-      wait_until = Kernel::get_ms_count() + kServoStepWaitMs;
-      state = State::CALIBRATION_MOVE;
+      beginScanEvent.delay(kServoStepWaitTime.count());
+      beginScanEvent.call();
     }
   }
 }
 
-void scan_step(int step, size_t border, State nextState, State switchState) {
+void processScan(uint16_t distance) {
+  auto hasContact{distance < baseline[currentStep]};
+  led.write(hasContact);
+  Targeting::report(currentStep, hasContact);
+
+  ssize_t step = 0;
+
+  if (direction == Direction::DOWNSCAN) {
+    if (currentStep == 0) {
+      direction = Direction::UPSCAN;
+    } else {
+      step = -1;
+    }
+  } else {
+    if (currentStep == numSteps - 1) {
+      direction = Direction::DOWNSCAN;
+    } else {
+      step = 1;
+    }
+  }
+
+  if (step != 0) {
+    VL53L1X_StopRanging(sensorId);
+    setServo(currentStep + step);
+    beginScanEvent.call();
+  } else {
+    Targeting::resetState();
+    rereadSensorEvent.delay(kSensorTimingInterval.count());
+    rereadSensorEvent.call();
+  }
+}
+
+// Sensor positioned, start scanning
+void beginScan() {
+  VL53L1X_StartRanging(sensorId);
+  cal = CalibrationData();
+
+  // Check sensor soon.
+  readSensorEvent.delay(kSensorTimingBudget.count());
+  readSensorEvent.call();
+}
+
+// Check if sensor data is ready.
+void readSensor() {
   uint8_t ready{0};
 
   VL53L1X_CheckForDataReady(sensorId, &ready);
   if (!ready) {
-    // Try again
+    printf("sensor not ready\n");
+    // Try again real soon.
+    // XXX check how often this happens, maybe adjust initial delay.
+    rereadSensorEvent.delay(10 /*ms*/);
+    rereadSensorEvent.call();
     return;
   }
 
@@ -114,22 +155,20 @@ void scan_step(int step, size_t border, State nextState, State switchState) {
   VL53L1X_GetResult(sensorId, &result);
   VL53L1X_ClearInterrupt(sensorId);
 
-  // printf("sample: %hu\n", result.Distance);
+  printf("sample: %hu\n", result.Distance);
 
-  auto hasContact{result.Distance < baseline[currentStep]};
-  led.write(hasContact);
-  Targeting::report(currentStep, hasContact);
-
-  if (currentStep == border) {
-    // Switch direction
-    Targeting::resetState();
-    state = switchState;
+  if (direction == Direction::CALIBRATION) {
+    processCalibration(result.Distance);
   } else {
-    VL53L1X_StopRanging(sensorId);
-    setServo(currentStep + step);
-    wait_until = Kernel::get_ms_count() + kServoStepWaitMs;
-    state = nextState;
+    processScan(result.Distance);
   }
+}
+
+void rereadSensor() {
+  // This is a workaround for recursive event scheduling.
+  // Call next exent immediately.
+  readSensorEvent.delay(0);
+  readSensorEvent.call();
 }
 
 }  // namespace
@@ -143,10 +182,8 @@ void Ranging::init(float range, float angle) {
 
   // Set servo parameters
   servo.calibrate(range, angle);
+  // Reset servo position
   setServo(0);
-  // Wait 0.5 second for servo to get to position
-  wait_until = Kernel::get_ms_count() + kServoResetWaitMs;
-  state = State::CALIBRATION_MOVE;
 
   sensorId = VL53L1_RegisterDevice(&i2c, LaserSensor::ADDR_DEFAULT);
 
@@ -155,7 +192,7 @@ void Ranging::init(float range, float angle) {
     VL53L1X_BootState(sensorId, &bootState);
     if (bootState == 0) {
       // Wait for 1ms. Expected boot time is 1.2ms.
-      ThisThread::sleep_for(1);
+      ThisThread::sleep_for(1ms);
     }
   }
 
@@ -164,35 +201,11 @@ void Ranging::init(float range, float angle) {
   // Set long distance mode.
   VL53L1X_SetDistanceMode(sensorId, 2);
   // Set timings.
-  VL53L1X_SetTimingBudgetInMs(sensorId, 100);
-  VL53L1X_SetInterMeasurementInMs(sensorId, 200);
+  VL53L1X_SetTimingBudgetInMs(sensorId, kSensorTimingBudget.count());
+  VL53L1X_SetInterMeasurementInMs(sensorId, kSensorTimingInterval.count());
 
-  // SFX
-  Audio::play(Audio::Clip::STARTUP);
-}
-
-void Ranging::tick() {
-  switch (state) {
-    case State::CALIBRATION_MOVE:
-      if (waitMove(State::CALIBRATION_MEASURE)) {
-        // Reset calibration data collector.
-        cal = CalibrationData();
-      }
-      break;
-    case State::CALIBRATION_MEASURE:
-      calibration_step();
-      break;
-    case State::DOWNSCAN_MOVE:
-      waitMove(State::DOWNSCAN_MEASURE);
-      break;
-    case State::DOWNSCAN_MEASURE:
-      scan_step(-1, 0, State::DOWNSCAN_MOVE, State::UPSCAN_MEASURE);
-      break;
-    case State::UPSCAN_MOVE:
-      waitMove(State::UPSCAN_MEASURE);
-      break;
-    case State::UPSCAN_MEASURE:
-      scan_step(1, numSteps - 1, State::UPSCAN_MOVE, State::DOWNSCAN_MEASURE);
-      break;
-  }
+  // Wait 0.5 second for servo to get to position.
+  // XXX duration not yet implemented for UserAllocatedEvent.
+  beginScanEvent.delay(kServoResetWaitTime.count());
+  beginScanEvent.call();
 }

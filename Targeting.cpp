@@ -1,4 +1,5 @@
 #include "Targeting.h"
+
 #include "Audio.h"
 #include "FastServo.h"
 #include "mbed.h"
@@ -6,13 +7,16 @@
 namespace {
 
 DigitalOut laser{MBED_CONF_APP_LASER_POWER, 0};
-FastServo servo{MBED_CONF_APP_LASER_SERVO};
+FastServo servo{MBED_CONF_APP_LASER_SERVO_PWM};
 
 constexpr int kMinLockPoints{8};
 constexpr int kMaxBreakPoints{4};
-constexpr int kLaserOffDelayMs{5000};
-constexpr uint64_t kTargetAcquiredInterval{30000};
-constexpr uint64_t kTargetLostInterval{60000};
+
+// Force milliseconds here because some APIs expect this.
+using duration = std::chrono::milliseconds;
+constexpr duration kLaserOffDelay{5s};
+constexpr duration kTargetAcquiredInterval{30s};
+constexpr duration kTargetLostInterval{60s};
 
 float rotationStep;
 
@@ -21,12 +25,25 @@ size_t contactStart;
 size_t contactEnd;
 int contactGap;
 
-uint64_t lastSeenAtMs{0};
-uint64_t eventTimeMs{0};
-enum class DelayedEvent {
-  LASER_OFF,
-  PLAY_TARGET_LOST,
-} event;
+Kernel::Clock::time_point lastSeenAt{Kernel::Clock::time_point::min()};
+
+void laserOff();
+void targetLost();
+
+auto queue{mbed_event_queue()};
+auto laserOffEvent{queue->make_user_allocated_event(laserOff)};
+auto targetLostEvent{queue->make_user_allocated_event(targetLost)};
+
+void laserOff() {
+  laser = 0;
+  lastSeenAt = Kernel::Clock::now();
+  Audio::play(Audio::Clip::CONTACT_LOST);
+  targetLostEvent.call();
+}
+
+void targetLost() {
+  Audio::play(Audio::Clip::TARGET_LOST);
+}
 
 }  // namespace
 
@@ -38,6 +55,8 @@ void Targeting::init(float range, float angle) {
   size_t numSteps = angle * 2;
   MBED_ASSERT(numSteps > 1);
   rotationStep = 1.0 / (numSteps - 1);
+  laserOffEvent.delay(kLaserOffDelay.count());
+  targetLostEvent.delay(kTargetLostInterval.count());
 }
 
 void Targeting::resetState() {
@@ -69,7 +88,7 @@ void Targeting::report(size_t currentStep, bool hasContact) {
 
       // SFX
       if (laser.read() == 0) {
-        if (Kernel::get_ms_count() - lastSeenAtMs > kTargetAcquiredInterval) {
+        if (Kernel::Clock::now() - lastSeenAt > kTargetAcquiredInterval) {
           Audio::play(Audio::Clip::TARGET_ACQUIRED);
         } else {
           Audio::play(Audio::Clip::CONTACT_RESTORED);
@@ -78,10 +97,11 @@ void Targeting::report(size_t currentStep, bool hasContact) {
 
       // Turn on laser.
       laser = 1;
-      
-      // Schedule laser off.
-      eventTimeMs = Kernel::get_ms_count() + kLaserOffDelayMs;
-      event = DelayedEvent::LASER_OFF;
+
+      // [Re]Schedule laser off.
+      targetLostEvent.cancel();
+      laserOffEvent.cancel();
+      laserOffEvent.call();
     }
   } else if (hasLock) {
     // Target disappeared.
@@ -90,27 +110,6 @@ void Targeting::report(size_t currentStep, bool hasContact) {
     if (contactGap > kMaxBreakPoints) {
       // Target lost.
       resetState();
-    }
-  }
-}
-
-void Targeting::tick() {
-  if (eventTimeMs != 0) {
-    auto now = Kernel::get_ms_count();
-    if (now >= eventTimeMs) {
-      switch (event) {
-        case DelayedEvent::LASER_OFF:
-          lastSeenAtMs = now;
-          laser = 0;
-          Audio::play(Audio::Clip::CONTACT_LOST);
-          eventTimeMs = now + kTargetLostInterval;
-          event = DelayedEvent::PLAY_TARGET_LOST;
-          break;
-        case DelayedEvent::PLAY_TARGET_LOST:
-          Audio::play(Audio::Clip::TARGET_LOST);
-          eventTimeMs = 0;
-          break;
-      }
     }
   }
 }
