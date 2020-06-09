@@ -22,13 +22,13 @@
             "spif-driver.SPI_CLK": "PB_3",
             "spif-driver.SPI_CS": "PA_15",
             "app.AUDIO_PWM": "PB_0",
-            "app.AUDIO_MUTE": "PB_11",
-            "app.SENSOR_SCL": "PB_6",
-            "app.SENSOR_SDA": "PB_7",
-            "app.SENSOR_SERVO_PWM": "PB_10",
+            "app.AUDIO_MUTE": "PB_2",
+            "app.SENSOR_SCL": "PB_10",
+            "app.SENSOR_SDA": "PB_11",
+            "app.SENSOR_SERVO_PWM": "PA_6",
             "app.SENSOR_ANGLE_POT": "PA_5",
             "app.CONTACT_LED": "PB_1",
-            "app.LASER_SERVO_PWM": "PA_10",
+            "app.LASER_SERVO_PWM": "PA_7",
             "app.LASER_POWER": "PB_12"
         }
     }
