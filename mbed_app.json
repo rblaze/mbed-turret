@@ -21,7 +21,7 @@
             "spif-driver.SPI_MISO": "PB_4",
             "spif-driver.SPI_CLK": "PB_3",
             "spif-driver.SPI_CS": "PA_15",
-            "app.AUDIO_PWM": "PB_0",
+            "app.AUDIO_PWM": "PA_8",
             "app.AUDIO_MUTE": "PB_2",
             "app.SENSOR_SCL": "PB_10",
             "app.SENSOR_SDA": "PB_11",
