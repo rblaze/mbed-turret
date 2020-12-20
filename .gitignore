@@ -2,5 +2,9 @@
 .mbed
 BUILD/
 mbed-os/
+mbed-VL53L1X/
+board/*bak
+board/fp-info-cache
+board/turret-cache.lib
 mbed_settings.py
 mbed_settings.pyc
