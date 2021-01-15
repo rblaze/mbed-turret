@@ -39,7 +39,7 @@ const char *begin_scan[] = {
     "Turret_searching.raw",
     "Turret_activated.raw",
     "Turret_sentry_mode_activated.raw",
-    "Turret_would_you_come_over_here.raw",
+    "Turret_could_you_come_over_here.raw",
     "Turret_deploying.raw",
 };
 const char *target_acquired[] = {
