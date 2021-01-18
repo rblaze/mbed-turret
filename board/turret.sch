@@ -904,4 +904,526 @@ Wire Wire Line
 Wire Wire Line
 	3950 4050 3950 4200
 Connection ~ 8300 3950
+$Comp
+L MCU_ST_STM32F1:STM32F103CBTx U?
+U 1 1 60028286
+P -7000 1700
+F 0 "U?" H -7050 111 50  0000 C CNN
+F 1 "STM32F103CBTx" H -7050 20  50  0000 C CNN
+F 2 "Package_QFP:LQFP-48_7x7mm_P0.5mm" H -7600 300 50  0001 R CNN
+F 3 "http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/CD00161566.pdf" H -7000 1700 50  0001 C CNN
+	1    -7000 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GNDA #PWR0117
+U 1 1 6002C0B3
+P -6900 3650
+F 0 "#PWR0117" H -6900 3400 50  0001 C CNN
+F 1 "GNDA" H -6895 3477 50  0000 C CNN
+F 2 "" H -6900 3650 50  0001 C CNN
+F 3 "" H -6900 3650 50  0001 C CNN
+	1    -6900 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GNDD #PWR0118
+U 1 1 6002C91B
+P -7200 3650
+F 0 "#PWR0118" H -7200 3400 50  0001 C CNN
+F 1 "GNDD" H -7196 3495 50  0000 C CNN
+F 2 "" H -7200 3650 50  0001 C CNN
+F 3 "" H -7200 3650 50  0001 C CNN
+	1    -7200 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-6900 3200 -6900 3650
+Wire Wire Line
+	-7200 3200 -7200 3300
+Wire Wire Line
+	-7100 3200 -7100 3300
+Wire Wire Line
+	-7100 3300 -7200 3300
+Connection ~ -7200 3300
+Wire Wire Line
+	-7200 3300 -7200 3500
+Wire Wire Line
+	-7000 3200 -7000 3500
+Wire Wire Line
+	-7000 3500 -7200 3500
+Connection ~ -7200 3500
+Wire Wire Line
+	-7200 3500 -7200 3650
+$Comp
+L power:+3V3 #PWR0119
+U 1 1 600494DA
+P -6900 -1050
+F 0 "#PWR0119" H -6900 -1200 50  0001 C CNN
+F 1 "+3V3" H -6885 -877 50  0000 C CNN
+F 2 "" H -6900 -1050 50  0001 C CNN
+F 3 "" H -6900 -1050 50  0001 C CNN
+	1    -6900 -1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP_Small C?
+U 1 1 6004D32A
+P -6700 50
+F 0 "C?" V -6475 50  50  0000 C CNN
+F 1 "1u" V -6566 50  50  0000 C CNN
+F 2 "" H -6700 50  50  0001 C CNN
+F 3 "~" H -6700 50  50  0001 C CNN
+	1    -6700 50  
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:CP_Small C?
+U 1 1 6004DDC1
+P -6500 -250
+F 0 "C?" V -6275 -250 50  0000 C CNN
+F 1 "10n" V -6366 -250 50  0000 C CNN
+F 2 "" H -6500 -250 50  0001 C CNN
+F 3 "~" H -6500 -250 50  0001 C CNN
+	1    -6500 -250
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	-6800 -250 -6600 -250
+Wire Wire Line
+	-6600 50   -6200 50  
+Wire Wire Line
+	-6200 50   -6200 -100
+Wire Wire Line
+	-6400 -250 -6200 -250
+Wire Wire Line
+	-6200 -250 -6200 -100
+Connection ~ -6200 -100
+$Comp
+L Device:CP_Small C?
+U 1 1 6007BC2A
+P -7300 0
+F 0 "C?" V -7525 0   50  0000 C CNN
+F 1 "100n" V -7434 0   50  0000 C CNN
+F 2 "" H -7300 0   50  0001 C CNN
+F 3 "~" H -7300 0   50  0001 C CNN
+	1    -7300 0   
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GNDA #PWR0120
+U 1 1 6007F849
+P -6200 -100
+F 0 "#PWR0120" H -6200 -350 50  0001 C CNN
+F 1 "GNDA" V -6195 -228 50  0000 R CNN
+F 2 "" H -6200 -100 50  0001 C CNN
+F 3 "" H -6200 -100 50  0001 C CNN
+	1    -6200 -100
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	-7100 200  -7100 100 
+Wire Wire Line
+	-7100 0    -7200 0   
+Wire Wire Line
+	-6800 -250 -6800 50  
+Connection ~ -6800 50  
+Wire Wire Line
+	-6800 50   -6800 200 
+$Comp
+L Device:CP_Small C?
+U 1 1 600A78D4
+P -7450 -300
+F 0 "C?" V -7675 -300 50  0000 C CNN
+F 1 "100n" V -7584 -300 50  0000 C CNN
+F 2 "" H -7450 -300 50  0001 C CNN
+F 3 "~" H -7450 -300 50  0001 C CNN
+	1    -7450 -300
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:CP_Small C?
+U 1 1 600A86C7
+P -7250 -600
+F 0 "C?" V -7475 -600 50  0000 C CNN
+F 1 "100n" V -7384 -600 50  0000 C CNN
+F 2 "" H -7250 -600 50  0001 C CNN
+F 3 "~" H -7250 -600 50  0001 C CNN
+	1    -7250 -600
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	-7200 200  -7200 100 
+Wire Wire Line
+	-7200 100  -7100 100 
+Connection ~ -7100 100 
+Wire Wire Line
+	-7100 100  -7100 0   
+$Comp
+L Device:CP_Small C?
+U 1 1 600B09A7
+P -7450 -900
+F 0 "C?" V -7675 -900 50  0000 C CNN
+F 1 "4u7" V -7584 -900 50  0000 C CNN
+F 2 "" H -7450 -900 50  0001 C CNN
+F 3 "~" H -7450 -900 50  0001 C CNN
+	1    -7450 -900
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GNDD #PWR0121
+U 1 1 600B1865
+P -7550 0
+F 0 "#PWR0121" H -7550 -250 50  0001 C CNN
+F 1 "GNDD" V -7546 -110 50  0000 R CNN
+F 2 "" H -7550 0   50  0001 C CNN
+F 3 "" H -7550 0   50  0001 C CNN
+	1    -7550 0   
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	-7000 200  -7000 -300
+Wire Wire Line
+	-7000 -300 -7350 -300
+Wire Wire Line
+	-6900 -600 -7150 -600
+Wire Wire Line
+	-6900 -600 -6900 -900
+Wire Wire Line
+	-6900 -900 -7350 -900
+Connection ~ -6900 -600
+Wire Wire Line
+	-6900 -900 -6900 -1050
+Connection ~ -6900 -900
+$Comp
+L Connector_Generic:Conn_01x06 J?
+U 1 1 6011071E
+P -9250 500
+F 0 "J?" H -9332 -25 50  0000 C CNN
+F 1 "Conn_01x06" H -9332 66  50  0000 C CNN
+F 2 "" H -9250 500 50  0001 C CNN
+F 3 "~" H -9250 500 50  0001 C CNN
+	1    -9250 500 
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDD #PWR0122
+U 1 1 60127C5A
+P -8900 600
+F 0 "#PWR0122" H -8900 350 50  0001 C CNN
+F 1 "GNDD" V -8896 490 50  0000 R CNN
+F 2 "" H -8900 600 50  0001 C CNN
+F 3 "" H -8900 600 50  0001 C CNN
+	1    -8900 600 
+	0    -1   -1   0   
+$EndComp
+Entry Wire Line
+	-5650 2800 -5550 2900
+Entry Wire Line
+	-5650 2900 -5550 3000
+Text Label -5900 2800 0    50   ~ 0
+SWDIO
+Text Label -5900 2900 0    50   ~ 0
+SWCLK
+Entry Wire Line
+	-8300 500  -8200 600 
+Entry Wire Line
+	-8300 700  -8200 800 
+Text Label -8650 700  0    50   ~ 0
+SWCLK
+Wire Wire Line
+	-9050 600  -8900 600 
+Wire Wire Line
+	-9050 700  -8300 700 
+Wire Wire Line
+	-9050 500  -8300 500 
+Text Label -8650 500  0    50   ~ 0
+SWDIO
+Wire Wire Line
+	-9050 400  -7700 400 
+Entry Wire Line
+	-5600 1700 -5500 1800
+Entry Wire Line
+	-5600 1800 -5500 1900
+Text Label -5900 1700 0    50   ~ 0
+SERTX
+Text Label -5900 1800 0    50   ~ 0
+SERRX
+Entry Wire Line
+	-8300 300  -8200 200 
+Entry Wire Line
+	-8300 200  -8200 100 
+Wire Wire Line
+	-9050 300  -8300 300 
+Wire Wire Line
+	-9050 200  -8300 200 
+Text Label -8800 300  0    50   ~ 0
+SERTX
+Text Label -8800 200  0    50   ~ 0
+SERRX
+Wire Wire Line
+	-6900 -600 -6900 200 
+$Comp
+L power:+3V3 #PWR0123
+U 1 1 6023283F
+P -7100 0
+F 0 "#PWR0123" H -7100 -150 50  0001 C CNN
+F 1 "+3V3" H -7085 173 50  0000 C CNN
+F 2 "" H -7100 0   50  0001 C CNN
+F 3 "" H -7100 0   50  0001 C CNN
+	1    -7100 0   
+	1    0    0    -1  
+$EndComp
+Connection ~ -7100 0   
+$Comp
+L power:+3V3 #PWR0124
+U 1 1 60232F9E
+P -7000 -300
+F 0 "#PWR0124" H -7000 -450 50  0001 C CNN
+F 1 "+3V3" H -6985 -127 50  0000 C CNN
+F 2 "" H -7000 -300 50  0001 C CNN
+F 3 "" H -7000 -300 50  0001 C CNN
+	1    -7000 -300
+	1    0    0    -1  
+$EndComp
+Connection ~ -7000 -300
+$Comp
+L power:+3V3 #PWR0125
+U 1 1 60233C06
+P -6800 -250
+F 0 "#PWR0125" H -6800 -400 50  0001 C CNN
+F 1 "+3V3" H -6785 -77 50  0000 C CNN
+F 2 "" H -6800 -250 50  0001 C CNN
+F 3 "" H -6800 -250 50  0001 C CNN
+	1    -6800 -250
+	1    0    0    -1  
+$EndComp
+Connection ~ -6800 -250
+$Comp
+L power:GNDD #PWR0126
+U 1 1 60238B25
+P -7700 -300
+F 0 "#PWR0126" H -7700 -550 50  0001 C CNN
+F 1 "GNDD" V -7696 -410 50  0000 R CNN
+F 2 "" H -7700 -300 50  0001 C CNN
+F 3 "" H -7700 -300 50  0001 C CNN
+	1    -7700 -300
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GNDD #PWR0127
+U 1 1 602393A3
+P -7800 -900
+F 0 "#PWR0127" H -7800 -1150 50  0001 C CNN
+F 1 "GNDD" H -7796 -1055 50  0000 C CNN
+F 2 "" H -7800 -900 50  0001 C CNN
+F 3 "" H -7800 -900 50  0001 C CNN
+	1    -7800 -900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-7550 -900 -7650 -900
+Wire Wire Line
+	-7350 -600 -7650 -600
+Wire Wire Line
+	-7650 -600 -7650 -900
+Connection ~ -7650 -900
+Wire Wire Line
+	-7650 -900 -7800 -900
+Wire Wire Line
+	-7550 -300 -7700 -300
+Wire Wire Line
+	-7550 0    -7400 0   
+Wire Wire Line
+	-6400 2900 -5650 2900
+Wire Wire Line
+	-6400 2800 -5650 2800
+Wire Wire Line
+	-6400 1800 -5600 1800
+Wire Wire Line
+	-6400 1700 -5600 1700
+Entry Wire Line
+	-5950 1900 -5850 2000
+Entry Wire Line
+	-5950 2000 -5850 2100
+Entry Wire Line
+	-5950 2100 -5850 2200
+Entry Wire Line
+	-5950 2200 -5850 2300
+Wire Wire Line
+	-6400 1900 -5950 1900
+Wire Wire Line
+	-6400 2000 -5950 2000
+Wire Wire Line
+	-6400 2100 -5950 2100
+Wire Wire Line
+	-6400 2200 -5950 2200
+Text Label -6350 1900 0    50   ~ 0
+SPI_NSS
+Text Label -6350 2000 0    50   ~ 0
+SPI_SCK
+Text Label -6350 2100 0    50   ~ 0
+SPI_MISO
+Text Label -6350 2200 0    50   ~ 0
+SPI_MOSI
+$Comp
+L Memory_Flash:W25Q32JVSS U?
+U 1 1 60313CB0
+P -3700 100
+F 0 "U?" H -3700 681 50  0000 C CNN
+F 1 "W25Q32JVSS" H -3700 590 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W7.62mm" H -3700 100 50  0001 C CNN
+F 3 "http://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf" H -3700 100 50  0001 C CNN
+	1    -3700 100 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 60313CC3
+P -2900 300
+F 0 "R?" V -3096 300 50  0000 C CNN
+F 1 "10K" V -3005 300 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" H -2900 300 50  0001 C CNN
+F 3 "~" H -2900 300 50  0001 C CNN
+	1    -2900 300 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 60313CC9
+P -4300 -150
+F 0 "R?" V -4496 -150 50  0000 C CNN
+F 1 "10K" V -4405 -150 50  0000 C CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" H -4300 -150 50  0001 C CNN
+F 3 "~" H -4300 -150 50  0001 C CNN
+	1    -4300 -150
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	-3200 300  -3050 300 
+$Comp
+L power:+3V3 #PWR0128
+U 1 1 60313CD0
+P -2600 250
+F 0 "#PWR0128" H -2600 100 50  0001 C CNN
+F 1 "+3V3" H -2585 423 50  0000 C CNN
+F 2 "" H -2600 250 50  0001 C CNN
+F 3 "" H -2600 250 50  0001 C CNN
+	1    -2600 250 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-2800 300  -2600 300 
+Wire Wire Line
+	-2600 300  -2600 250 
+Wire Wire Line
+	-4200 0    -4300 0   
+Wire Wire Line
+	-4300 -300 -3700 -300
+$Comp
+L power:GNDD #PWR0129
+U 1 1 603213FC
+P -3700 650
+F 0 "#PWR0129" H -3700 400 50  0001 C CNN
+F 1 "GNDD" H -3696 495 50  0000 C CNN
+F 2 "" H -3700 650 50  0001 C CNN
+F 3 "" H -3700 650 50  0001 C CNN
+	1    -3700 650 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-3700 500  -3700 650 
+$Comp
+L Device:CP_Small C?
+U 1 1 6032CF4F
+P -3300 -500
+F 0 "C?" H -3388 -546 50  0000 R CNN
+F 1 "100n" H -3388 -455 50  0000 R CNN
+F 2 "" H -3300 -500 50  0001 C CNN
+F 3 "~" H -3300 -500 50  0001 C CNN
+	1    -3300 -500
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDD #PWR0130
+U 1 1 6032DBD3
+P -3300 -650
+F 0 "#PWR0130" H -3300 -900 50  0001 C CNN
+F 1 "GNDD" H -3296 -805 50  0000 C CNN
+F 2 "" H -3300 -650 50  0001 C CNN
+F 3 "" H -3300 -650 50  0001 C CNN
+	1    -3300 -650
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	-3300 -650 -3300 -600
+$Comp
+L power:+3V3 #PWR0131
+U 1 1 60338F8F
+P -3050 -300
+F 0 "#PWR0131" H -3050 -450 50  0001 C CNN
+F 1 "+3V3" V -3035 -172 50  0000 L CNN
+F 2 "" H -3050 -300 50  0001 C CNN
+F 3 "" H -3050 -300 50  0001 C CNN
+	1    -3050 -300
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	-3700 -300 -3300 -300
+Connection ~ -3700 -300
+Wire Wire Line
+	-3300 -300 -3050 -300
+Connection ~ -3300 -300
+Entry Wire Line
+	-4800 -100 -4700 0   
+Entry Wire Line
+	-4800 100  -4700 200 
+Wire Wire Line
+	-4700 0    -4300 0   
+Connection ~ -4300 0   
+Wire Wire Line
+	-4700 200  -4200 200 
+Wire Wire Line
+	-3300 -300 -3300 -400
+Entry Wire Line
+	-2800 -100 -2700 -200
+Entry Wire Line
+	-2800 0    -2700 -100
+Wire Wire Line
+	-3200 -100 -2800 -100
+Wire Wire Line
+	-3200 0    -2800 0   
+Text Label -3150 -100 0    50   ~ 0
+SPI_MOSI
+Text Label -3150 0    0    50   ~ 0
+SPI_MISO
+Text Label -4600 200  0    50   ~ 0
+SPI_SCK
+Text Label -4700 0    0    50   ~ 0
+SPI_NSS
+Wire Wire Line
+	-4300 -250 -4300 -300
+Wire Wire Line
+	-4300 0    -4300 -50 
+Wire Wire Line
+	-3200 200  -3050 200 
+Wire Wire Line
+	-3050 200  -3050 300 
+Wire Bus Line
+	-5550 2850 -5550 3100
+Wire Bus Line
+	-8200 500  -8200 900 
+Wire Bus Line
+	-5500 1700 -5500 2000
+Wire Bus Line
+	-8200 50   -8200 250 
+Wire Bus Line
+	-4800 -200 -4800 200 
+Wire Bus Line
+	-2700 -250 -2700 0   
+Wire Bus Line
+	-5850 1900 -5850 2400
+Connection ~ -3050 300 
+Wire Wire Line
+	-3050 300  -3000 300 
 $EndSCHEMATC
