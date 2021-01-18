@@ -1409,6 +1409,254 @@ Wire Wire Line
 	-3200 200  -3050 200 
 Wire Wire Line
 	-3050 200  -3050 300 
+Connection ~ -3050 300 
+Wire Wire Line
+	-3050 300  -3000 300 
+$Comp
+L Custom_IC:TPA2005D1DGN U?
+U 1 1 6005E159
+P -6150 6050
+F 0 "U?" H -6150 6631 50  0000 C CNN
+F 1 "TPA2005D1DGN" H -6150 6540 50  0000 C CNN
+F 2 "" H -6150 6050 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/tpa2005d1.pdf" H -6150 6050 50  0001 C CNN
+	1    -6150 6050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Speaker LS?
+U 1 1 6005F9DD
+P -5100 5900
+F 0 "LS?" H -4930 5896 50  0000 L CNN
+F 1 "Speaker" H -4930 5805 50  0000 L CNN
+F 2 "" H -5100 5700 50  0001 C CNN
+F 3 "~" H -5110 5850 50  0001 C CNN
+	1    -5100 5900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-5750 5850 -5300 5850
+Wire Wire Line
+	-5300 5850 -5300 5900
+Wire Wire Line
+	-5300 6000 -5300 6050
+Wire Wire Line
+	-5300 6050 -5750 6050
+Wire Wire Line
+	-6150 6450 -6150 6600
+$Comp
+L Device:C_Small C?
+U 1 1 60085220
+P -5900 5350
+F 0 "C?" V -6129 5350 50  0000 C CNN
+F 1 "100n" V -6038 5350 50  0000 C CNN
+F 2 "" H -5900 5350 50  0001 C CNN
+F 3 "~" H -5900 5350 50  0001 C CNN
+	1    -5900 5350
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GNDA #PWR0133
+U 1 1 60087C0E
+P -5600 5350
+F 0 "#PWR0133" H -5600 5100 50  0001 C CNN
+F 1 "GNDA" V -5595 5222 50  0000 R CNN
+F 2 "" H -5600 5350 50  0001 C CNN
+F 3 "" H -5600 5350 50  0001 C CNN
+	1    -5600 5350
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GNDA #PWR0134
+U 1 1 600887BA
+P -6150 6600
+F 0 "#PWR0134" H -6150 6350 50  0001 C CNN
+F 1 "GNDA" H -6145 6427 50  0000 C CNN
+F 2 "" H -6150 6600 50  0001 C CNN
+F 3 "" H -6150 6600 50  0001 C CNN
+	1    -6150 6600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	-5600 5350 -5800 5350
+Wire Wire Line
+	-6150 5250 -6150 5350
+Wire Wire Line
+	-6000 5350 -6150 5350
+Connection ~ -6150 5350
+Wire Wire Line
+	-6150 5350 -6150 5650
+$Comp
+L Device:R_Small R?
+U 1 1 600AF2B8
+P -6750 6400
+F 0 "R?" H -6809 6354 50  0000 R CNN
+F 1 "10K" H -6809 6445 50  0000 R CNN
+F 2 "" H -6750 6400 50  0001 C CNN
+F 3 "~" H -6750 6400 50  0001 C CNN
+	1    -6750 6400
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 600B0BEA
+P -6950 6150
+F 0 "R?" H -6891 6196 50  0000 L CNN
+F 1 "150K" H -6891 6105 50  0000 L CNN
+F 2 "" H -6950 6150 50  0001 C CNN
+F 3 "~" H -6950 6150 50  0001 C CNN
+	1    -6950 6150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small C?
+U 1 1 600BEADE
+P -7200 6250
+F 0 "C?" V -7429 6250 50  0000 C CNN
+F 1 "10n" V -7338 6250 50  0000 C CNN
+F 2 "" H -7200 6250 50  0001 C CNN
+F 3 "~" H -7200 6250 50  0001 C CNN
+	1    -7200 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GNDA #PWR0135
+U 1 1 600C1177
+P -7500 6250
+F 0 "#PWR0135" H -7500 6000 50  0001 C CNN
+F 1 "GNDA" V -7495 6123 50  0000 R CNN
+F 2 "" H -7500 6250 50  0001 C CNN
+F 3 "" H -7500 6250 50  0001 C CNN
+	1    -7500 6250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 600C1F81
+P -6950 5750
+F 0 "R?" H -6891 5796 50  0000 L CNN
+F 1 "150K" H -6891 5705 50  0000 L CNN
+F 2 "" H -6950 5750 50  0001 C CNN
+F 3 "~" H -6950 5750 50  0001 C CNN
+	1    -6950 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small C?
+U 1 1 600C2B2C
+P -7200 5650
+F 0 "C?" V -7429 5650 50  0000 C CNN
+F 1 "10n" V -7338 5650 50  0000 C CNN
+F 2 "" H -7200 5650 50  0001 C CNN
+F 3 "~" H -7200 5650 50  0001 C CNN
+	1    -7200 5650
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:C_Small C?
+U 1 1 600C3883
+P -7500 5750
+F 0 "C?" H -7408 5796 50  0000 L CNN
+F 1 "100n" H -7408 5705 50  0000 L CNN
+F 2 "" H -7500 5750 50  0001 C CNN
+F 3 "~" H -7500 5750 50  0001 C CNN
+	1    -7500 5750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R?
+U 1 1 600C4AB1
+P -7600 5450
+F 0 "R?" V -7404 5450 50  0000 C CNN
+F 1 "R_Small" V -7495 5450 50  0000 C CNN
+F 2 "" H -7600 5450 50  0001 C CNN
+F 3 "~" H -7600 5450 50  0001 C CNN
+	1    -7600 5450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GNDD #PWR0136
+U 1 1 600C6014
+P -7700 5850
+F 0 "#PWR0136" H -7700 5600 50  0001 C CNN
+F 1 "GNDD" V -7696 5740 50  0000 R CNN
+F 2 "" H -7700 5850 50  0001 C CNN
+F 3 "" H -7700 5850 50  0001 C CNN
+	1    -7700 5850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	-6550 6250 -6750 6250
+Wire Wire Line
+	-6750 6250 -6750 6300
+Wire Wire Line
+	-6550 6050 -6950 6050
+Wire Wire Line
+	-6950 6250 -7100 6250
+Wire Wire Line
+	-7500 6250 -7300 6250
+Wire Wire Line
+	-6550 5850 -6950 5850
+Wire Wire Line
+	-6950 5650 -7100 5650
+Wire Wire Line
+	-7300 5650 -7500 5650
+Wire Wire Line
+	-7500 5850 -7700 5850
+Wire Wire Line
+	-7500 5650 -7500 5450
+Connection ~ -7500 5650
+Entry Wire Line
+	-8200 5350 -8100 5450
+Entry Wire Line
+	-7300 6650 -7200 6550
+Text Label -7050 6550 0    50   ~ 0
+MUTE
+Wire Wire Line
+	-8100 5450 -7700 5450
+Text Label -8050 5450 0    50   ~ 0
+AUDIO
+Entry Wire Line
+	-8150 1400 -8050 1500
+Text Label -8000 1500 0    50   ~ 0
+AUDIO
+Wire Wire Line
+	-8050 1500 -7700 1500
+Entry Wire Line
+	-8150 1500 -8050 1600
+Wire Wire Line
+	-8050 1600 -7700 1600
+Text Label -8000 1600 0    50   ~ 0
+MUTE
+Wire Wire Line
+	-7200 6550 -6750 6550
+Wire Wire Line
+	-6750 6550 -6750 6500
+$Comp
+L power:+5V #PWR?
+U 1 1 601F76D6
+P -6150 5250
+F 0 "#PWR?" H -6150 5100 50  0001 C CNN
+F 1 "+5V" H -6135 5423 50  0000 C CNN
+F 2 "" H -6150 5250 50  0001 C CNN
+F 3 "" H -6150 5250 50  0001 C CNN
+	1    -6150 5250
+	1    0    0    -1  
+$EndComp
+Text Notes -8050 5050 0    50   ~ 0
+Low-pass 4KHz filter
+Wire Notes Line
+	-7300 5100 -7300 6000
+Wire Notes Line
+	-7300 6000 -8050 6000
+Wire Notes Line
+	-8050 6000 -8050 5100
+Wire Bus Line
+	-8200 5250 -8200 5450
+Wire Bus Line
+	-7300 6550 -7300 6750
+Wire Notes Line
+	-8050 5100 -7300 5100
 Wire Bus Line
 	-5550 2850 -5550 3100
 Wire Bus Line
@@ -1422,8 +1670,7 @@ Wire Bus Line
 Wire Bus Line
 	-2700 -250 -2700 0   
 Wire Bus Line
+	-8150 1350 -8150 1600
+Wire Bus Line
 	-5850 1900 -5850 2400
-Connection ~ -3050 300 
-Wire Wire Line
-	-3050 300  -3000 300 
 $EndSCHEMATC
