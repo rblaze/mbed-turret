@@ -1,13 +1,13 @@
 #include "Targeting.h"
-
 #include "Audio.h"
-#include "FastServo.h"
-#include "mbed.h"
+
+#include <Servo.h>
+#include <mbed.h>
 
 namespace {
 
 DigitalOut laser{MBED_CONF_APP_LASER_POWER, 0};
-FastServo servo{MBED_CONF_APP_LASER_SERVO_PWM};
+Servo servo{MBED_CONF_APP_LASER_SERVO_PWM};
 
 constexpr int kMinLockPoints{8};
 constexpr int kMaxBreakPoints{4};
