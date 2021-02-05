@@ -9,8 +9,10 @@
 namespace {
 
 // Hardware
-DigitalOut enable{PA_4, 0};
-SPIFBlockDevice spif{PB_15, PB_14, PB_13, PB_12};
+DigitalOut enable{MBED_CONF_APP_AUDIO_ENABLE, 0};
+SPIFBlockDevice spif{
+    MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
+    MBED_CONF_SPIF_DRIVER_SPI_CLK, MBED_CONF_SPIF_DRIVER_SPI_CS};
 LittleFileSystem fs{"fs", &spif};
 
 struct ClipList {
