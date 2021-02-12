@@ -1,7 +1,6 @@
 {
     "config": {
-        "AUDIO_PWM": null,
-        "AUDIO_MUTE": null,
+        "AUDIO_ENABLE": null,
         "SENSOR_SCL": "I2C_SCL",
         "SENSOR_SDA": "I2C_SDA",
         "SENSOR_SERVO_PWM": null,
@@ -17,19 +16,18 @@
             "target.components_add": ["SPIF"]
         },
         "NUCLEO_F103RB": {
-            "spif-driver.SPI_MOSI": "PB_5",
-            "spif-driver.SPI_MISO": "PB_4",
-            "spif-driver.SPI_CLK": "PB_3",
-            "spif-driver.SPI_CS": "PA_15",
-            "app.AUDIO_PWM": "PA_8",
-            "app.AUDIO_MUTE": "PB_2",
-            "app.SENSOR_SCL": "PB_10",
-            "app.SENSOR_SDA": "PB_11",
-            "app.SENSOR_SERVO_PWM": "PA_6",
-            "app.SENSOR_ANGLE_POT": "PA_5",
-            "app.CONTACT_LED": "PB_1",
-            "app.LASER_SERVO_PWM": "PA_7",
-            "app.LASER_POWER": "PB_12"
+            "spif-driver.SPI_MOSI": "PB_15",
+            "spif-driver.SPI_MISO": "PB_14",
+            "spif-driver.SPI_CLK": "PB_13",
+            "spif-driver.SPI_CS": "PB_12",
+            "app.AUDIO_ENABLE": "PA_4",
+            "app.SENSOR_SCL": "PB_6",
+            "app.SENSOR_SDA": "PB_7",
+            "app.SENSOR_SERVO_PWM": "PA_8",
+            "app.SENSOR_ANGLE_POT": "PA_1",
+            "app.CONTACT_LED": "PB_3",
+            "app.LASER_SERVO_PWM": "PA_9",
+            "app.LASER_POWER": "PB_4"
         }
     }
 }

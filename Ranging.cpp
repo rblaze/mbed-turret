@@ -1,6 +1,6 @@
 #include "Ranging.h"
 
-#include <FastServo.h>
+#include <Servo.h>
 #include <LaserSensor.h>
 #include <mbed.h>
 
@@ -16,7 +16,7 @@ constexpr float kMinDiff{100};
 
 // Hardware
 DigitalOut led{MBED_CONF_APP_CONTACT_LED, 0};
-FastServo servo{MBED_CONF_APP_SENSOR_SERVO_PWM};
+Servo servo{MBED_CONF_APP_SENSOR_SERVO_PWM};
 I2C i2c{MBED_CONF_APP_SENSOR_SDA, MBED_CONF_APP_SENSOR_SCL};
 uint16_t sensorId;
 

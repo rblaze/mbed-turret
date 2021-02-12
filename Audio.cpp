@@ -1,21 +1,20 @@
 #include "Audio.h"
 
-#include <FastPWM.h>
 #include <LittleFileSystem.h>
 #include <SPIFBlockDevice.h>
 #include <mbed.h>
 
+#include "AudioGen.h"
+
 namespace {
 
 // Hardware
-FastPWM pwm{MBED_CONF_APP_AUDIO_PWM};
-DigitalOut mute{MBED_CONF_APP_AUDIO_MUTE, 1};
+DigitalOut enable{MBED_CONF_APP_AUDIO_ENABLE, 0};
 SPIFBlockDevice spif{
     MBED_CONF_SPIF_DRIVER_SPI_MOSI, MBED_CONF_SPIF_DRIVER_SPI_MISO,
     MBED_CONF_SPIF_DRIVER_SPI_CLK, MBED_CONF_SPIF_DRIVER_SPI_CS};
 LittleFileSystem fs{"fs", &spif};
 
-// Data structures
 struct ClipList {
   size_t count;
   const char **files;
@@ -28,8 +27,10 @@ enum class State {
 };
 
 // Clips are unsigned 8 bit, 16 KHz.
-constexpr uint32_t kFreq = 16000;
-constexpr size_t kBlockSize = 900;
+// TODO extend to 10 bits?
+using SampleType = uint8_t;
+constexpr unsigned int kFreq = 16000;
+constexpr unsigned int kBufSize = 1024;
 
 const char *startup[] = {
     "Turret_sfx_deploy.raw",
@@ -75,73 +76,146 @@ constexpr ClipList clips[] = {
     {sizeof(target_lost) / sizeof(const char *), target_lost},
     {sizeof(picked_up) / sizeof(const char *), picked_up}};
 
-Ticker ticker;
 File file;
 
-uint8_t buf[kBlockSize * 2];
-size_t position;
-volatile size_t lastSample;
+SampleType buf1[kBufSize];
+size_t buf1len;
+SampleType buf2[kBufSize];
+size_t buf2len;
+int activeBuffer;
 State state{State::IDLE};
 
-void playSample();
-
 void startClip() {
-  mute = 0;
-  ticker.attach(&playSample, 1000000us / kFreq);
-}
+  enable = 1;
 
-void readNext() {
-  ssize_t readPos = lastSample >= sizeof(buf) ? 0 : lastSample;
-  ssize_t rd = file.read(buf + readPos, kBlockSize);
-
-  if (rd > 0) {
-    lastSample = readPos + rd;
+  if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3) != HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(
+            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
+        "HAL_TIM_PWM_Start()");
   }
 
-  if (rd != kBlockSize) {
-    state = State::DRAINING;
+  if (HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1) != HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(
+            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
+        "HAL_TIM_OC_Start()");
+  }
+
+  __HAL_TIM_ENABLE_DMA(&htim2, TIM_DMA_CC1);
+}
+
+void playBuffer(SampleType *buffer, size_t len) {
+  if (HAL_DMA_Start_IT(
+          &hdma_tim2_ch1, (uint32_t)buffer, (uint32_t)(&htim3.Instance->CCR3),
+          len) != HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(
+            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
+        "HAL_DMA_Start_IT()");
   }
 }
 
 void endClip() {
-  pwm.write(0);
-  mute = 1;
+  __HAL_TIM_DISABLE_DMA(&htim2, TIM_DMA_CC1);
+
+  if (HAL_TIM_OC_Stop(&htim2, TIM_CHANNEL_1) != HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
+        "HAL_TIM_OC_Stop()");
+  }
+
+  if (HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_3) != HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
+        "HAL_TIM_PWM_Stop()");
+  }
+  htim3.Instance->CCR3 = 0;
+
+  enable = 0;
   file.close();
   state = State::IDLE;
 
-  printf("done %d %d\n", position, lastSample);
+  printf("done\n");
+}
+
+void playNextBlock() {
+  if (state == State::DRAINING) {
+    endClip();
+  } else {
+    SampleType *playbuf;
+    size_t playlen;
+    SampleType *rdbuf;
+    size_t *rdlen;
+
+    if (activeBuffer == 0) {
+      playbuf = buf2;
+      playlen = buf2len;
+      rdbuf = buf1;
+      rdlen = &buf1len;
+      activeBuffer = 1;
+    } else {
+      playbuf = buf1;
+      playlen = buf1len;
+      rdbuf = buf2;
+      rdlen = &buf2len;
+      activeBuffer = 0;
+    }
+
+    playBuffer(playbuf, playlen);
+    ssize_t rd = file.read(rdbuf, kBufSize * sizeof(SampleType));
+    if (rd > 0) {
+      *rdlen = rd / sizeof(SampleType);
+    } else {
+      // End of data, wait for current buffer to finish and stop.
+      state = State::DRAINING;
+    }
+  }
 }
 
 auto queue{mbed_event_queue()};
-auto startClipEvent{queue->make_user_allocated_event(startClip)};
-auto readNextEvent{queue->make_user_allocated_event(readNext)};
-auto endClipEvent{queue->make_user_allocated_event(endClip)};
+auto playNextBlockEvent{queue->make_user_allocated_event(playNextBlock)};
 
-// Play single sample from buffer
-void playSample() {
-  // precondition - there is sample to play
-  double sample = buf[position];
-  pwm.write(sample / 256.0);
-  position += 1;
+void dmaCompleteCallback(DMA_HandleTypeDef *_hdma) {
+  playNextBlockEvent.call();
+}
 
-  if (position == lastSample) {
-    ticker.detach();
-    endClipEvent.call();
-  } else {
-    if (position % kBlockSize == 0 && state == State::PLAYING) {
-      readNextEvent.call();
-    }
-
-    if (position >= sizeof(buf)) {
-      position = 0;
-    }
-  }
+void dmaErrorCallback(DMA_HandleTypeDef *_hdma) {
+  MBED_ERROR(
+      MBED_MAKE_ERROR(
+          MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
+      "DMA transfer error");
 }
 
 }  // namespace
 
 void Audio::init() {
-  pwm.period_us(4);
+  Audio_HW_Init(kFreq);
+
+  // Register end-of-transfer callbacks
+  if (HAL_DMA_RegisterCallback(
+          &hdma_tim2_ch1, HAL_DMA_XFER_CPLT_CB_ID, &dmaCompleteCallback) !=
+      HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
+        "HAL_DMA_RegisterCallback()");
+  }
+
+  if (HAL_DMA_RegisterCallback(
+          &hdma_tim2_ch1, HAL_DMA_XFER_ERROR_CB_ID, &dmaErrorCallback) !=
+      HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
+        "HAL_DMA_RegisterCallback()");
+  }
+
+  if (HAL_DMA_RegisterCallback(
+          &hdma_tim2_ch1, HAL_DMA_XFER_ABORT_CB_ID, &dmaErrorCallback) !=
+      HAL_OK) {
+    MBED_ERROR(
+        MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
+        "HAL_DMA_RegisterCallback()");
+  }
 }
 
 void Audio::play(Audio::Clip clip) {
@@ -154,15 +228,19 @@ void Audio::play(Audio::Clip clip) {
 
     int status = file.open(&fs, path, O_RDONLY);
     if (status == 0) {
-      ssize_t read = file.read(buf, sizeof(buf));
-      if (read > 0) {
-        position = 0;
-        lastSample = read;
-        state = read == sizeof(buf) ? State::PLAYING : State::DRAINING;
-        startClipEvent.call();
+      ssize_t rd = file.read(buf1, sizeof(buf1));
+      if (rd > 0) {
+        buf1len = rd / sizeof(SampleType);
+        state = State::PLAYING;
+        activeBuffer = 1;
+
+        startClip();
+        playNextBlock();
       } else {
         file.close();
       }
+    } else {
+      printf("open failed %d\n", status);
     }
   }
 }
