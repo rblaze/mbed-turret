@@ -25,9 +25,9 @@
             "app.SENSOR_SDA": "PB_7",
             "app.SENSOR_SERVO_PWM": "PA_8",
             "app.SENSOR_ANGLE_POT": "PA_1",
-            "app.CONTACT_LED": "PC_15",
+            "app.CONTACT_LED": "PB_3",
             "app.LASER_SERVO_PWM": "PA_9",
-            "app.LASER_POWER": "PC_14"
+            "app.LASER_POWER": "PB_4"
         }
     }
 }
