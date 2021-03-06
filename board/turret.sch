@@ -1517,34 +1517,6 @@ Wire Wire Line
 	4450 5000 4600 5000
 Wire Wire Line
 	7400 2300 7900 2300
-Wire Bus Line
-	7300 2150 7300 2350
-Wire Bus Line
-	8350 5550 8350 5750
-Wire Bus Line
-	7300 2550 7300 2800
-Wire Bus Line
-	7300 3100 7300 3350
-Wire Bus Line
-	9450 1600 9450 1900
-Wire Bus Line
-	3700 4850 3700 5050
-Wire Bus Line
-	9450 2400 9450 2700
-Wire Bus Line
-	700  3850 700  4050
-Wire Bus Line
-	700  4700 700  6800
-Wire Bus Line
-	7250 3950 7250 4150
-Wire Bus Line
-	6000 6400 6000 6650
-Wire Bus Line
-	3800 6450 3800 6850
-Wire Bus Line
-	9450 2950 9450 3800
-Wire Bus Line
-	3100 5250 3100 6750
 Wire Wire Line
 	8600 2300 8750 2300
 Wire Wire Line
@@ -1582,4 +1554,84 @@ F 3 "~" H 8050 2300 50  0001 C CNN
 	1    8050 2300
 	0    1    1    0   
 $EndComp
+$Comp
+L Mechanical:MountingHole_Pad H1
+U 1 1 6045128E
+P 6750 6000
+F 0 "H1" H 6850 6049 50  0000 L CNN
+F 1 "MountingHole_Pad" H 6850 5958 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 6750 6000 50  0001 C CNN
+F 3 "~" H 6750 6000 50  0001 C CNN
+	1    6750 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H2
+U 1 1 60451F4E
+P 7050 6000
+F 0 "H2" H 7150 6049 50  0000 L CNN
+F 1 "MountingHole_Pad" H 7150 5958 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 7050 6000 50  0001 C CNN
+F 3 "~" H 7050 6000 50  0001 C CNN
+	1    7050 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H3
+U 1 1 60452F18
+P 7350 6000
+F 0 "H3" H 7450 6049 50  0000 L CNN
+F 1 "MountingHole_Pad" H 7450 5958 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 7350 6000 50  0001 C CNN
+F 3 "~" H 7350 6000 50  0001 C CNN
+	1    7350 6000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GNDPWR #PWR08
+U 1 1 60454D37
+P 6750 6300
+F 0 "#PWR08" H 6750 6100 50  0001 C CNN
+F 1 "GNDPWR" H 6754 6146 50  0000 C CNN
+F 2 "" H 6750 6250 50  0001 C CNN
+F 3 "" H 6750 6250 50  0001 C CNN
+	1    6750 6300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6750 6300 6750 6100
+Wire Wire Line
+	6750 6100 7050 6100
+Connection ~ 6750 6100
+Connection ~ 7050 6100
+Wire Wire Line
+	7050 6100 7350 6100
+Wire Bus Line
+	7300 2150 7300 2350
+Wire Bus Line
+	8350 5550 8350 5750
+Wire Bus Line
+	7300 2550 7300 2800
+Wire Bus Line
+	7300 3100 7300 3350
+Wire Bus Line
+	9450 1600 9450 1900
+Wire Bus Line
+	3700 4850 3700 5050
+Wire Bus Line
+	700  3850 700  4050
+Wire Bus Line
+	7250 3950 7250 4150
+Wire Bus Line
+	3800 6450 3800 6850
+Wire Bus Line
+	6000 6400 6000 6650
+Wire Bus Line
+	9450 2400 9450 2700
+Wire Bus Line
+	9450 2950 9450 3800
+Wire Bus Line
+	700  4700 700  6800
+Wire Bus Line
+	3100 5250 3100 6750
 $EndSCHEMATC
