@@ -6,5 +6,6 @@ mbed-VL53L1X/
 board/*bak
 board/fp-info-cache
 board/turret-cache.lib
+board/plots/
 mbed_settings.py
 mbed_settings.pyc
