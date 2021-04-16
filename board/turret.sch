@@ -872,7 +872,6 @@ Text Label 2600 5950 0    50   ~ 0
 SRV_SEN
 Entry Wire Line
 	3000 5950 3100 6050
-NoConn ~ 1250 5650
 Text Label 2600 5650 0    50   ~ 0
 LASER
 Wire Wire Line
@@ -1527,72 +1526,6 @@ F 3 "~" H 8050 2300 50  0001 C CNN
 	1    8050 2300
 	0    1    1    0   
 $EndComp
-$Comp
-L Mechanical:MountingHole_Pad H1
-U 1 1 6045128E
-P 6750 6000
-F 0 "H1" H 6850 6049 50  0000 L CNN
-F 1 "MountingHole_Pad" H 6850 5958 50  0000 L CNN
-F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 6750 6000 50  0001 C CNN
-F 3 "~" H 6750 6000 50  0001 C CNN
-	1    6750 6000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole_Pad H2
-U 1 1 60451F4E
-P 7050 6000
-F 0 "H2" H 7150 6049 50  0000 L CNN
-F 1 "MountingHole_Pad" H 7150 5958 50  0000 L CNN
-F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 7050 6000 50  0001 C CNN
-F 3 "~" H 7050 6000 50  0001 C CNN
-	1    7050 6000
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole_Pad H3
-U 1 1 60452F18
-P 7350 6000
-F 0 "H3" H 7450 6049 50  0000 L CNN
-F 1 "MountingHole_Pad" H 7450 5958 50  0000 L CNN
-F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 7350 6000 50  0001 C CNN
-F 3 "~" H 7350 6000 50  0001 C CNN
-	1    7350 6000
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GNDPWR #PWR08
-U 1 1 60454D37
-P 6750 6300
-F 0 "#PWR08" H 6750 6100 50  0001 C CNN
-F 1 "GNDPWR" H 6754 6146 50  0000 C CNN
-F 2 "" H 6750 6250 50  0001 C CNN
-F 3 "" H 6750 6250 50  0001 C CNN
-	1    6750 6300
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6750 6300 6750 6100
-Wire Wire Line
-	6750 6100 7050 6100
-Connection ~ 6750 6100
-Connection ~ 7050 6100
-Wire Wire Line
-	7050 6100 7350 6100
-$Comp
-L Mechanical:MountingHole_Pad H4
-U 1 1 60560F3E
-P 7650 6000
-F 0 "H4" H 7750 6049 50  0000 L CNN
-F 1 "MountingHole_Pad" H 7750 5958 50  0000 L CNN
-F 2 "MountingHole:MountingHole_2.2mm_M2_ISO7380_Pad" H 7650 6000 50  0001 C CNN
-F 3 "~" H 7650 6000 50  0001 C CNN
-	1    7650 6000
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7350 6100 7650 6100
-Connection ~ 7350 6100
 Wire Wire Line
 	4350 6350 4950 6350
 $Comp
@@ -1620,6 +1553,147 @@ F 3 "http://www.infineon.com/dgdl/Infineon-BC847SERIES_BC848SERIES_BC849SERIES_B
 	1    4800 5000
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	1250 5650 800  5650
+Text Label 850  5650 0    50   ~ 0
+BUTTON
+Entry Wire Line
+	700  5550 800  5650
+Entry Wire Line
+	3700 3800 3800 3900
+$Comp
+L Switch:SW_Push SW1
+U 1 1 607F3ADD
+P 4450 3900
+F 0 "SW1" H 4450 4185 50  0000 C CNN
+F 1 "SW_Push" H 4450 4094 50  0000 C CNN
+F 2 "Button_Switch_SMD:SW_SPST_PTS810" H 4450 4100 50  0001 C CNN
+F 3 "~" H 4450 4100 50  0001 C CNN
+	1    4450 3900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R9
+U 1 1 607F61CD
+P 5000 3900
+F 0 "R9" V 4793 3900 50  0000 C CNN
+F 1 "10K" V 4884 3900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0402_1005Metric" V 4930 3900 50  0001 C CNN
+F 3 "~" H 5000 3900 50  0001 C CNN
+	1    5000 3900
+	0    1    1    0   
+$EndComp
+$Comp
+L power:VDD #PWR08
+U 1 1 607F7FBC
+P 5300 3900
+F 0 "#PWR08" H 5300 3750 50  0001 C CNN
+F 1 "VDD" H 5315 4073 50  0000 C CNN
+F 2 "" H 5300 3900 50  0001 C CNN
+F 3 "" H 5300 3900 50  0001 C CNN
+	1    5300 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4650 3900 4850 3900
+Wire Wire Line
+	5150 3900 5300 3900
+Wire Wire Line
+	3800 3900 4250 3900
+Text Label 3900 3900 0    50   ~ 0
+BUTTON
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 6086894E
+P 5900 650
+F 0 "H1" H 6000 696 50  0000 L CNN
+F 1 "MountingHole" H 6000 605 50  0000 L CNN
+F 2 "Custom_IC:JLCPCB_Tooling_Hole" H 5900 650 50  0001 C CNN
+F 3 "~" H 5900 650 50  0001 C CNN
+	1    5900 650 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 6086AFE2
+P 5900 850
+F 0 "H2" H 6000 896 50  0000 L CNN
+F 1 "MountingHole" H 6000 805 50  0000 L CNN
+F 2 "Custom_IC:JLCPCB_Tooling_Hole" H 5900 850 50  0001 C CNN
+F 3 "~" H 5900 850 50  0001 C CNN
+	1    5900 850 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 6086BC88
+P 5900 1050
+F 0 "H3" H 6000 1096 50  0000 L CNN
+F 1 "MountingHole" H 6000 1005 50  0000 L CNN
+F 2 "Custom_IC:JLCPCB_Tooling_Hole" H 5900 1050 50  0001 C CNN
+F 3 "~" H 5900 1050 50  0001 C CNN
+	1    5900 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H4
+U 1 1 60810206
+P 6850 650
+F 0 "H4" V 6804 800 50  0000 L CNN
+F 1 "MountingHole_Pad" V 6895 800 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad" H 6850 650 50  0001 C CNN
+F 3 "~" H 6850 650 50  0001 C CNN
+	1    6850 650 
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H5
+U 1 1 608110A0
+P 6850 850
+F 0 "H5" V 6804 1000 50  0000 L CNN
+F 1 "MountingHole_Pad" V 6895 1000 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad" H 6850 850 50  0001 C CNN
+F 3 "~" H 6850 850 50  0001 C CNN
+	1    6850 850 
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H6
+U 1 1 60811BA9
+P 6850 1050
+F 0 "H6" V 6804 1200 50  0000 L CNN
+F 1 "MountingHole_Pad" V 6895 1200 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad" H 6850 1050 50  0001 C CNN
+F 3 "~" H 6850 1050 50  0001 C CNN
+	1    6850 1050
+	0    1    1    0   
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H7
+U 1 1 60812531
+P 6850 1250
+F 0 "H7" V 6804 1400 50  0000 L CNN
+F 1 "MountingHole_Pad" V 6895 1400 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.2mm_M2_DIN965_Pad" H 6850 1250 50  0001 C CNN
+F 3 "~" H 6850 1250 50  0001 C CNN
+	1    6850 1250
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR09
+U 1 1 60813215
+P 6750 1400
+F 0 "#PWR09" H 6750 1150 50  0001 C CNN
+F 1 "GND" H 6755 1227 50  0000 C CNN
+F 2 "" H 6750 1400 50  0001 C CNN
+F 3 "" H 6750 1400 50  0001 C CNN
+	1    6750 1400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6750 650  6750 850 
+Wire Bus Line
+	3700 3750 3700 3950
 Wire Bus Line
 	7300 2150 7300 2350
 Wire Bus Line
@@ -1648,4 +1722,13 @@ Wire Bus Line
 	700  4700 700  6800
 Wire Bus Line
 	3100 5250 3100 6750
+Connection ~ 6750 850 
+Wire Wire Line
+	6750 850  6750 1050
+Connection ~ 6750 1050
+Wire Wire Line
+	6750 1050 6750 1250
+Connection ~ 6750 1250
+Wire Wire Line
+	6750 1250 6750 1400
 $EndSCHEMATC
