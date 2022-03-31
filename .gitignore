@@ -7,5 +7,6 @@ board/*bak
 board/fp-info-cache
 board/turret-cache.lib
 board/plots/
+board/turret-backups/
 mbed_settings.py
 mbed_settings.pyc
