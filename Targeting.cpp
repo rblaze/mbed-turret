@@ -1,7 +1,7 @@
 #include "Targeting.h"
 #include "Audio.h"
+#include "Servo.h"
 
-#include <Servo.h>
 #include <mbed.h>
 
 namespace {

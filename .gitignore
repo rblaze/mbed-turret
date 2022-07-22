@@ -8,5 +8,6 @@ board/fp-info-cache
 board/turret-cache.lib
 board/plots/
 board/turret-backups/
+cmake_build/
 mbed_settings.py
 mbed_settings.pyc

@@ -1,11 +1,11 @@
 #include "Ranging.h"
 
-#include <Servo.h>
 #include <LaserSensor.h>
 #include <mbed.h>
 
 #include "Audio.h"
 #include "Calibration.h"
+#include "Servo.h"
 #include "Targeting.h"
 
 namespace {

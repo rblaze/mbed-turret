@@ -1,5 +1,6 @@
 #include "Audio.h"
 
+#include <File.h>
 #include <LittleFileSystem.h>
 #include <SPIFBlockDevice.h>
 #include <mbed.h>
