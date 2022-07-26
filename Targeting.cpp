@@ -1,8 +1,9 @@
 #include "Targeting.h"
-#include "Audio.h"
-#include "Servo.h"
 
 #include <mbed.h>
+
+#include "Audio.h"
+#include "Servo.h"
 
 namespace {
 
@@ -41,9 +42,7 @@ void laserOff() {
   targetLostEvent.call();
 }
 
-void targetLost() {
-  Audio::play(Audio::Clip::TARGET_LOST);
-}
+void targetLost() { Audio::play(Audio::Clip::TARGET_LOST); }
 
 }  // namespace
 

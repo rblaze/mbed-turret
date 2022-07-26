@@ -90,30 +90,26 @@ void startClip() {
   enable = 1;
 
   if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3) != HAL_OK) {
-    MBED_ERROR(
-        MBED_MAKE_ERROR(
-            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
-        "HAL_TIM_PWM_Start()");
+    MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION,
+                               MBED_ERROR_CODE_FAILED_OPERATION),
+               "HAL_TIM_PWM_Start()");
   }
 
   if (HAL_TIM_OC_Start(&htim2, TIM_CHANNEL_1) != HAL_OK) {
-    MBED_ERROR(
-        MBED_MAKE_ERROR(
-            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
-        "HAL_TIM_OC_Start()");
+    MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION,
+                               MBED_ERROR_CODE_FAILED_OPERATION),
+               "HAL_TIM_OC_Start()");
   }
 
   __HAL_TIM_ENABLE_DMA(&htim2, TIM_DMA_CC1);
 }
 
 void playBuffer(SampleType *buffer, size_t len) {
-  if (HAL_DMA_Start_IT(
-          &hdma_tim2_ch1, (uint32_t)buffer, (uint32_t)(&htim3.Instance->CCR3),
-          len) != HAL_OK) {
-    MBED_ERROR(
-        MBED_MAKE_ERROR(
-            MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
-        "HAL_DMA_Start_IT()");
+  if (HAL_DMA_Start_IT(&hdma_tim2_ch1, (uint32_t)buffer,
+                       (uint32_t)(&htim3.Instance->CCR3), len) != HAL_OK) {
+    MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION,
+                               MBED_ERROR_CODE_FAILED_OPERATION),
+               "HAL_DMA_Start_IT()");
   }
 }
 
@@ -182,10 +178,9 @@ void dmaCompleteCallback(DMA_HandleTypeDef *_hdma) {
 }
 
 void dmaErrorCallback(DMA_HandleTypeDef *_hdma) {
-  MBED_ERROR(
-      MBED_MAKE_ERROR(
-          MBED_MODULE_APPLICATION, MBED_ERROR_CODE_FAILED_OPERATION),
-      "DMA transfer error");
+  MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_APPLICATION,
+                             MBED_ERROR_CODE_FAILED_OPERATION),
+             "DMA transfer error");
 }
 
 }  // namespace
@@ -194,25 +189,22 @@ void Audio::init() {
   Audio_HW_Init(kFreq);
 
   // Register end-of-transfer callbacks
-  if (HAL_DMA_RegisterCallback(
-          &hdma_tim2_ch1, HAL_DMA_XFER_CPLT_CB_ID, &dmaCompleteCallback) !=
-      HAL_OK) {
+  if (HAL_DMA_RegisterCallback(&hdma_tim2_ch1, HAL_DMA_XFER_CPLT_CB_ID,
+                               &dmaCompleteCallback) != HAL_OK) {
     MBED_ERROR(
         MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
         "HAL_DMA_RegisterCallback()");
   }
 
-  if (HAL_DMA_RegisterCallback(
-          &hdma_tim2_ch1, HAL_DMA_XFER_ERROR_CB_ID, &dmaErrorCallback) !=
-      HAL_OK) {
+  if (HAL_DMA_RegisterCallback(&hdma_tim2_ch1, HAL_DMA_XFER_ERROR_CB_ID,
+                               &dmaErrorCallback) != HAL_OK) {
     MBED_ERROR(
         MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
         "HAL_DMA_RegisterCallback()");
   }
 
-  if (HAL_DMA_RegisterCallback(
-          &hdma_tim2_ch1, HAL_DMA_XFER_ABORT_CB_ID, &dmaErrorCallback) !=
-      HAL_OK) {
+  if (HAL_DMA_RegisterCallback(&hdma_tim2_ch1, HAL_DMA_XFER_ABORT_CB_ID,
+                               &dmaErrorCallback) != HAL_OK) {
     MBED_ERROR(
         MBED_MAKE_ERROR(MBED_MODULE_HAL, MBED_ERROR_CODE_INITIALIZATION_FAILED),
         "HAL_DMA_RegisterCallback()");

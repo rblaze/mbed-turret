@@ -1,9 +1,10 @@
 #pragma once
 
+#include <mbed_assert.h>
+
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <mbed_assert.h>
 
 struct Point {
   float mean{0};
@@ -11,7 +12,7 @@ struct Point {
 };
 
 class CalibrationData {
-public:
+ public:
   void add_sample(uint16_t value) {
     count_ += 1;
     float v = value;
@@ -31,11 +32,9 @@ public:
     return Point{mean_, stddev};
   }
 
-  int count() {
-    return count_;
-  }
+  int count() { return count_; }
 
-private:
+ private:
   int count_{0};
   float mean_{0};
   float m2_{0};

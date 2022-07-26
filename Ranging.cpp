@@ -25,7 +25,9 @@ enum class Direction {
   CALIBRATION,
   DOWNSCAN,
   UPSCAN,
-} direction{Direction::CALIBRATION};
+};
+
+Direction direction{Direction::CALIBRATION};
 
 // Timings
 // Force milliseconds here because some APIs expect this.

@@ -1,5 +1,6 @@
 *.swp
 .mbed
+.vscode/
 BUILD/
 mbed-os/
 mbed-VL53L1X/
